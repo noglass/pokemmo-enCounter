@@ -24,3 +24,7 @@ You can pause the counter, disabling all key and button input, except for unpaus
 
 All of these bindings can be held to repeat the task.  
 Holding your Sweet Scent key will *not* repeatedly increment!
+
+## Dependencies
+* pynput: `pip3 install pynput`
+* tkinter: `sudo apt-get install python3-tk`
