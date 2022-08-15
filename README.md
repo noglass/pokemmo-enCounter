@@ -25,7 +25,10 @@ You can pause the counter, disabling all key and button input, except for unpaus
 * Configure Only Horde Quantity: `Ctrl+H`
 
 All of these bindings can be held to repeat the task.  
-Holding your Sweet Scent key will *not* repeatedly increment!
+Holding your Sweet Scent key will *not* repeatedly increment!  
+
+You can click and drag anywhere on the window to move it.  
+The script will remember where you moved it to the next time you open it.
 
 ## Dependencies
 * pynput: `pip3 install pynput`

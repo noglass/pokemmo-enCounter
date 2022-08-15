@@ -1,7 +1,11 @@
 #!/bin/python3
+# enCounter by MistressMuddy
+# https://github.com/noglass/pokemmo-enCounter
 
 import tkinter as tk
 
+# CreateToolTip by crxguy52
+# https://stackoverflow.com/a/36221216
 class CreateToolTip(object):
     """
     create a tooltip for a given widget
@@ -58,24 +62,6 @@ class CreateToolTip(object):
     def setText(self,text):
         self.text = text
 
-def close():
-    root.destroy()
-    listener.stop()
-
-def onClick(event):
-    global lastClick
-    lastClick = [ event.x, event.y ]
-
-def onDrag(event):
-    global lastClick
-    delta = [ event.x - lastClick[0], event.y - lastClick[1] ]
-    root.geometry(f'+{root.winfo_x()+delta[0]}+{root.winfo_y()+delta[1]}')
-
-def onUnClick(event):
-    global lastClick
-    lastClick = None
-    save()
-
 count = 0
 quantity = 5
 scentKey = None
@@ -88,14 +74,32 @@ shiftMod = False
 superMod = False
 pause = False
 
+def close():
+    root.destroy()
+    listener.stop()
+
+def onClick(event):
+    global lastClick
+    lastClick = [ event.x, event.y, 0 ]
+
+def onDrag(event):
+    global lastClick
+    lastClick[2] = 1
+    delta = [ event.x - lastClick[0], event.y - lastClick[1] ]
+    root.geometry(f'+{root.winfo_x()+delta[0]}+{root.winfo_y()+delta[1]}')
+
+def onUnClick(event):
+    global lastClick
+    if lastClick[2] == 1:
+        save()
+    lastClick = None
+
 def plusOne():
     inc(1)
+
 def minusOne():
     dec(1)
-def plusQuant():
-    inc(quantity)
-def minusQuant():
-    dec(quantity)
+
 def undo():
     global count, last, undoPoint, undoButton
     count += last[undoPoint]
@@ -106,11 +110,11 @@ def undo():
     if undoPoint == 0 and last[undoPoint] == 0:
         undoButton["state"] = "disabled"
     save()
+
 def togglePause():
     global pause, plusButton, minusButton, undoButton, configButton, resetButton
     pause = not pause
     if pause:
-        print('\nInput is being paused! Press Alt+Esc to resume!')
         label.config(text='PAUSED')
         labeltip.setText('Input is being paused!\nPress Alt+Esc to resume!')
         plusButton["state"] = "disabled"
@@ -118,17 +122,8 @@ def togglePause():
         undoButton["state"] = "disabled"
         configButton["state"] = "disabled"
         resetButton["state"] = "disabled"
-        root.configure(bg='red')
-        label.configure(bg='red')
-        plusButton.configure(bg='red')
-        minusButton.configure(bg='red')
-        configButton.configure(bg='red')
-        resetButton.configure(bg='red')
-        pauseButton.configure(bg='red')
-        undoButton.configure(bg='red')
-        exitButton.configure(bg='red')
+        setColor('red')
     else:
-        print('\nInput is now resumed!')
         if count < 10:
             label.config(text='{:,} '.format(count))
         else:
@@ -140,29 +135,38 @@ def togglePause():
         resetButton["state"] = "normal"
         if undoPoint > 0 or last[undoPoint] != 0:
             undoButton["state"] = "normal"
-        root.configure(bg='grey')
-        label.configure(bg='grey')
-        plusButton.configure(bg='grey')
-        minusButton.configure(bg='grey')
-        configButton.configure(bg='grey')
-        resetButton.configure(bg='grey')
-        pauseButton.configure(bg='grey')
-        undoButton.configure(bg='grey')
-        exitButton.configure(bg='grey')
+        setColor('grey')
     root.update()
-def configure():
+
+def configure(retry=False):
     global setKey
-    print('\nPlease press your Sweet Scent key!')
-    label.config(text='Press your Sweet Scent keybind!')
-    labeltip.setText('Press the key you have bound to activate Sweet Scent.')
-    root.update_idletasks()
-    root.geometry(f'{label.winfo_reqwidth()+30}x{root.winfo_height()}')
-    root.update_idletasks()
-    exitButton.place(x=root.winfo_width()-exitButton.winfo_reqwidth(),y=0)
+    if setKey == 0:
+        label.config(text='Press your Sweet Scent keybind!')
+        labeltip.setText('Press the key you have bound to activate Sweet Scent.')
+    else:
+        if retry:
+            label.config(text='Enter the number of encounters per horde! Please enter a valid number!')
+            setKey -= 1
+        else:
+            label.config(text='Enter the number of encounters per horde!')
+        labeltip.setText('Press a single digit number corresponding to the horde count you are shunting.')
+    resizeToFit(label.winfo_reqwidth()+30)
     root.update()
-    setKey = 1
+    setKey += 1
+
 def reset():
     dec(count)
+
+def setColor(color):
+    root.configure(bg=color)
+    label.configure(bg=color)
+    plusButton.configure(bg=color)
+    minusButton.configure(bg=color)
+    configButton.configure(bg=color)
+    resetButton.configure(bg=color)
+    pauseButton.configure(bg=color)
+    undoButton.configure(bg=color)
+    exitButton.configure(bg=color)
 
 root = tk.Tk()
 root.attributes('-topmost', True)
@@ -176,52 +180,44 @@ root.bind('<ButtonRelease-1>', onUnClick)
 root.bind('<B1-Motion>', onDrag)
 pixelVirtual = tk.PhotoImage(width=1, height=1)
 
+tk.Label(text='', bg='grey', fg='white').grid(row=0, column=2)
+
 exitButton = tk.Button(text='×', image=pixelVirtual, width=1, height=7, compound='c', command=close, bg='grey', fg='white', activebackground='black', activeforeground='white')
-#exitButton.pack(side='top', anchor='ne')
-#exitButton.grid(row=0, column=2, sticky='e', ipadx=0)
-exitTip = CreateToolTip(exitButton,'Exit')
-
-tk.Label(text='').grid(row=0, column=0)
-
 label = tk.Label(text='{:,}'.format(count), bg='grey', fg='white')
-label.place(x=1,y=0)
-#label.grid(row=0, column=0, columnspan=2, sticky='w', ipadx=0)
-labeltip = CreateToolTip(label,f'Horde quantity: {quantity}\nSweet Scent Key: {scentKey}')
-print(f'{label.winfo_reqwidth()}')
-pauseButton = tk.Button(text='⏸︎', image=pixelVirtual, width=1, height=7, compound='c', command=togglePause, bg='grey', fg='white', activebackground='black', activeforeground='white')
-#pauseButton.pack(side='left')
-pauseButton.grid(row=2, column=1, sticky='w', ipadx=0)
-CreateToolTip(pauseButton,'Pause\nAlt+Esc')
 plusButton = tk.Button(text='+', image=pixelVirtual, width=1, height=7, compound='c', command=plusOne, bg='grey', fg='white', activebackground='black', activeforeground='white')
-#plusButton.pack(side='left')
-plusButton.grid(row=1, column=0, sticky='w', ipadx=0)
-CreateToolTip(plusButton,"Increase count\nCtrl+'+' or Ctrl+'='\nTo increase count by horde count press\nCtrl+'*' or Ctrl+8")
 minusButton = tk.Button(text='-', image=pixelVirtual, width=1, height=7, compound='c', command=minusOne, bg='grey', fg='white', activebackground='black', activeforeground='white')
-#minusButton.pack(side='left')
-minusButton.grid(row=1, column=1, sticky='w', ipadx=0)
-CreateToolTip(minusButton,"Decrease count\nCtrl+'-'\nTo decrease count by horde count press\nCtrl+'/'")
-#plusQButton = tk.Button(text='+H', image=pixelVirtual, width=1, height=7, compound='c', command=plusQuant)
-#plusQButton.pack(side='left')
-#minusQButton = tk.Button(text='-H', image=pixelVirtual, width=1, height=7, compound='c', command=minusQuant)
-#minusQButton.pack(side='left')
 undoButton = tk.Button(text='Undo', image=pixelVirtual, width=15, height=7, compound='c', command=undo, bg='grey', fg='white', activebackground='black', activeforeground='white')
-#undoButton.pack(side='left')
-undoButton.grid(row=1, column=2, sticky='w', ipadx=0)
-CreateToolTip(undoButton,'Ctrl+Z')
 configButton = tk.Button(text='⚙', image=pixelVirtual, width=1, height=7, compound='c', command=configure, bg='grey', fg='white', activebackground='black', activeforeground='white')
-#configButton.pack(side='left')
-configButton.grid(row=2, column=0, sticky='w', ipadx=0)
-CreateToolTip(configButton,'Configure\nCtrl+Esc')
+pauseButton = tk.Button(text='⏸︎', image=pixelVirtual, width=1, height=7, compound='c', command=togglePause, bg='grey', fg='white', activebackground='black', activeforeground='white')
 resetButton = tk.Button(text='Reset', image=pixelVirtual, width=15, height=7, compound='c', command=reset, bg='grey', fg='white', activebackground='black', activeforeground='white')
-resetButton.grid(row=2, column=2, sticky='w', ipadx=0)
-CreateToolTip(resetButton,'Click this to reset your count to 0.\nOnly do this when you encounter a shiny!\nCan be undone ;p')
 
-undoButton["state"] = "disabled"
+CreateToolTip(exitButton,'Exit')
+labeltip = CreateToolTip(label,f'Horde quantity: {quantity}\nSweet Scent Key: {scentKey}')
+CreateToolTip(plusButton,"Increase count\nCtrl+'+' or Ctrl+'='\nTo increase count by horde count press\nCtrl+'*' or Ctrl+8")
+CreateToolTip(minusButton,"Decrease count\nCtrl+'-'\nTo decrease count by horde count press\nCtrl+'/'")
+CreateToolTip(undoButton,'Ctrl+Z')
+CreateToolTip(configButton,'Configure\nCtrl+Esc')
+CreateToolTip(pauseButton,'Pause\nAlt+Esc')
+CreateToolTip(resetButton,'Click this to reset your count to 0.\nCan be undone ;p')
+
+label.place(x=1,y=0)
+plusButton.grid(row=1, column=0, sticky='w', ipadx=0)
+minusButton.grid(row=1, column=1, sticky='w', ipadx=0)
+undoButton.grid(row=1, column=2, sticky='w', ipadx=0)
+configButton.grid(row=2, column=0, sticky='w', ipadx=0)
+pauseButton.grid(row=2, column=1, sticky='w', ipadx=0)
+resetButton.grid(row=2, column=2, sticky='w', ipadx=0)
 
 root.update_idletasks()
 winWidth = root.winfo_width()
-exitCoord = winWidth-exitButton.winfo_reqwidth()
-exitButton.place(x=exitCoord,y=0)
+exitButton.place(x=winWidth-exitButton.winfo_reqwidth(),y=0)
+
+undoButton["state"] = "disabled"
+
+def resizeToFit(width = winWidth):
+    root.update_idletasks()
+    root.geometry(f'{width}x{root.winfo_height()}')
+    exitButton.place(x=width-exitButton.winfo_reqwidth(),y=0)
 
 try:
     from encounters import *
@@ -229,13 +225,9 @@ except Exception as e:
     from pynput import keyboard
     setKey = 1
     wingeo = '+10+20'
-    print('No config file found . . .\nPlease press your Sweet Scent key!')
     label.config(text='Press your Sweet Scent keybind!')
     labeltip.setText('Press the key you have bound to activate Sweet Scent.')
-    root.update_idletasks()
-    root.geometry(f'{label.winfo_reqwidth()+30}x{root.winfo_height()}')
-    root.update_idletasks()
-    exitButton.place(x=root.winfo_width()-exitButton.winfo_reqwidth(),y=0)
+    resizeToFit(label.winfo_reqwidth()+30)
 
 if isinstance(scentKey,str):
     scentKey = keyboard.KeyCode(char=scentKey)
@@ -243,19 +235,9 @@ if isinstance(scentKey,str):
 root.geometry(wingeo)
 
 if setKey == 0:
-    print(f'enCounter started . . .\nCurrent horde quantity: {quantity}\nCurrent encounter count: {count}\n')
-    #label.config(text=f'{count}')
-    if count < 10:
-        label.config(text='{:,} '.format(count))
-    else:
-        label.config(text='{:,}'.format(count))
+    label.config(text='{:,}'.format(count))
     labeltip.setText(f'Horde quantity: {quantity}\nSweet Scent Key: {scentKey}')
-    root.update_idletasks()
-    root.geometry(f'{winWidth}x{root.winfo_height()}')
-    root.update_idletasks()
-    exitButton.place(x=exitCoord,y=0)
-    #plusQButton.config(text=f'+{quantity}')
-    #minusQButton.config(text=f'-{quantity}')
+    resizeToFit()
 
 def save():
     if setKey == 0:
@@ -265,12 +247,8 @@ def save():
         except AttributeError:
             file.write(f'#!/bin/python3\nfrom pynput import keyboard\nquantity = {quantity}\ncount = {count}\nscentKey = keyboard.{scentKey}\nwingeo = "+{root.winfo_x()}+{root.winfo_y()}"')
         file.close()
-        print(f'Count: {count}')
         if not pause:
-            if count < 10:
-                label.config(text='{:,} '.format(count))
-            else:
-                label.config(text='{:,}'.format(count))
+            label.config(text='{:,}'.format(count))
             labeltip.setText(f'Horde quantity: {quantity}\nSweet Scent Key: {scentKey}')
         root.update()
 
@@ -310,27 +288,19 @@ def on_press(key):
         elif key == keyboard.KeyCode(char='*') or key == keyboard.KeyCode(char='8'):
             inc(quantity)
         elif key == keyboard.KeyCode(char='-'):
-            dec(quantity)
-        elif key == keyboard.KeyCode(char='/'):
             dec(1)
+        elif key == keyboard.KeyCode(char='/'):
+            dec(quantity)
         elif key == keyboard.KeyCode(char='z'):
             if undoPoint == 0 and last[undoPoint] == 0:
-                print('Nothing to undo!')
                 undoButton["state"] = "disabled"
             else:
                 undo()
         elif key == keyboard.Key.esc:
             configure()
         elif key == keyboard.KeyCode(char='h'):
-            print('\nPlease press the single digit number corresponding to the horde count you are shunting!')
-            label.config(text='Enter the number of encounters per horde!')
-            labeltip.setText('Press a single digit number corresponding to the horde count you are shunting.')
-            root.update_idletasks()
-            root.geometry(f'{label.winfo_reqwidth()+30}x{root.winfo_height()}')
-            root.update_idletasks()
-            exitButton.place(x=root.winfo_width()-exitButton.winfo_reqwidth(),y=0)
-            root.update()
-            setKey = 2
+            setKey = 1
+            configure()
     elif modifier == False and altMod == True and shiftMod == False and superMod == False:
         if key == keyboard.Key.esc:
             togglePause()
@@ -348,15 +318,7 @@ def on_release(key):
     if pause == False and modifier == False and altMod == False and shiftMod == False and superMod == False:
         if setKey == 1:
             scentKey = key
-            print('\nPlease press the single digit number corresponding to the horde count you are shunting!')
-            label.config(text='Enter the number of encounters per horde!')
-            labeltip.setText('Press a single digit number corresponding to the horde count you are shunting.')
-            root.update_idletasks()
-            root.geometry(f'{label.winfo_reqwidth()+30}x{root.winfo_height()}')
-            root.update_idletasks()
-            exitButton.place(x=root.winfo_width()-exitButton.winfo_reqwidth(),y=0)
-            root.update()
-            setKey = 2
+            configure()
         elif setKey == 2:
             try:
                 keyChar = key.char
@@ -364,28 +326,13 @@ def on_release(key):
                 keyChar = 'n'
             if keyChar.isdigit():
                 quantity = int(keyChar)
-                print(f'\nenCounter started . . .\nCurrent horde quantity: {quantity}\nCurrent encounter count: {count}\n')
-                if count < 10:
-                    label.config(text='{:,} '.format(count))
-                else:
-                    label.config(text='{:,}'.format(count))
+                label.config(text='{:,}'.format(count))
                 labeltip.setText(f'Horde quantity: {quantity}\nSweet Scent Key: {scentKey}')
-                root.update_idletasks()
-                root.geometry(f'{winWidth}x{root.winfo_height()}')
-                exitButton.place(x=exitCoord,y=0)
-                #plusQButton.config(text=f'+{quantity}')
-                #minusQButton.config(text=f'-{quantity}')
+                resizeToFit()
                 root.update()
                 setKey = 0
             else:
-                print('\nPlease enter a valid number!')
-                label.config(text='Enter the number of encounters per horde! Please enter a valid number!')
-                labeltip.setText('Press a single digit number corresponding to the horde count you are shunting.')
-                root.update_idletasks()
-                root.geometry(f'{label.winfo_reqwidth()+30}x{root.winfo_height()}')
-                root.update_idletasks()
-                exitButton.place(x=root.winfo_width()-exitButton.winfo_reqwidth(),y=0)
-                root.update()
+                configure(True)
         elif key == scentKey:
             inc(quantity)
     if key == keyboard.Key.ctrl or key == keyboard.Key.ctrl_l or key == keyboard.Key.ctrl_r:
