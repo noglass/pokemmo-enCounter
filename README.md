@@ -1,5 +1,6 @@
 # PokeMMO enCounter
 ![screenshot](https://raw.githubusercontent.com/noglass/pokemmo-enCounter/main/screenshot.png)
+![screenshot2](https://raw.githubusercontent.com/noglass/pokemmo-enCounter/main/screenshot2.png)
 
 enCounter is an extremely lightweight and cross-platform Python3 script that creates a floating widget window that will count your encounters in PokeMMO!  
 
