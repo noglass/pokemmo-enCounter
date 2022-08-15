@@ -14,10 +14,10 @@ You can pause the counter, disabling all key and button input, except for unpaus
 
 ## Keybinds
 * Single Increment: `Ctrl+'+'` or `Ctrl+'='`
-* Horde Quantity Increment: `Ctrl+'*'` or `Ctrl+8`
+* Increment By Horde Quantity: `Ctrl+'*'` or `Ctrl+8`
 * Single Decrement: `Ctrl+'-'`
-* Horde Decrement: `Ctrl+'/'`
-* Undo: `Ctrl+Z`
+* Decrement By Horde Quantity: `Ctrl+'/'`
+* Undo (Up To the Last 50 Actions): `Ctrl+Z`
 * Pause/Unpause: `Alt+Esc`
 * Configure Sweet Scent Key and Horde Quantity: `Ctrl+Esc`
 * Configure Only Horde Quantity: `Ctrl+H`
