@@ -48,6 +48,7 @@ class CreateToolTip(object):
         y += self.widget.winfo_rooty() + 20
         # creates a toplevel window
         self.tw = tk.Toplevel(self.widget)
+        self.tw.wm_attributes("-topmost", True)
         # Leaves only the label and removes the app window
         self.tw.wm_overrideredirect(True)
         self.tw.wm_geometry("+%d+%d" % (x, y))
