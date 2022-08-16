@@ -3,6 +3,7 @@
 # https://github.com/noglass/pokemmo-enCounter
 
 import tkinter as tk
+from sys import platform
 
 globalFont = ( "Verdana", 9, "normal" )
 
@@ -79,6 +80,8 @@ pause = False
 def close():
     root.destroy()
     listener.stop()
+
+lastClick = None
 
 def onClick(event):
     global lastClick
@@ -181,17 +184,28 @@ root.configure(bg='grey')
 root.bind('<ButtonPress-1>', onClick)
 root.bind('<ButtonRelease-1>', onUnClick)
 root.bind('<B1-Motion>', onDrag)
-pixelVirtual = tk.PhotoImage(width=1, height=1)
 
-tk.Label(text='', bg='grey', fg='white', font=globalFont).grid(row=0, column=2)
-exitButton = tk.Button(text='×', image=pixelVirtual, width=5, height=7, compound='c', command=close, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
-label = tk.Label(text='{:,}'.format(count), bg='grey', fg='white', font=globalFont)
-plusButton = tk.Button(text='+', image=pixelVirtual, width=10, height=7, compound='c', command=plusOne, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
-minusButton = tk.Button(text='-', image=pixelVirtual, width=10, height=7, compound='c', command=minusOne, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
-undoButton = tk.Button(text='Undo', image=pixelVirtual, width=30, height=7, compound='c', command=undo, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
-configButton = tk.Button(text='⚙', image=pixelVirtual, width=10, height=7, compound='c', command=configure, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
-pauseButton = tk.Button(text='⏸︎', image=pixelVirtual, width=10, height=7, compound='c', command=togglePause, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
-resetButton = tk.Button(text='Reset', image=pixelVirtual, width=30, height=7, compound='c', command=reset, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
+if platform == 'win32' or platform == 'cygwin':
+    tk.Label(text='', bg='grey', fg='white', font=( "Verdana", 15, "normal" )).grid(row=0, column=2)
+    exitButton = tk.Button(text='×', width=2, command=close, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
+    label = tk.Label(text='{:,}'.format(count), bg='grey', fg='white', font=globalFont)
+    plusButton = tk.Button(text='+', width=2, command=plusOne, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
+    minusButton = tk.Button(text='-', width=2, command=minusOne, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
+    undoButton = tk.Button(text='Undo', width=6, command=undo, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
+    configButton = tk.Button(text='⚙', width=2, command=configure, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
+    pauseButton = tk.Button(text='⏸︎', width=2, command=togglePause, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
+    resetButton = tk.Button(text='Reset', width=6, command=reset, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
+else:
+    pixelVirtual = tk.PhotoImage(width=1, height=1)
+    tk.Label(text='', bg='grey', fg='white', font=globalFont).grid(row=0, column=2)
+    exitButton = tk.Button(text='×', image=pixelVirtual, width=3, height=6, compound='c', command=close, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
+    label = tk.Label(text='{:,}'.format(count), bg='grey', fg='white', font=globalFont)
+    plusButton = tk.Button(text='+', image=pixelVirtual, width=3, height=6, compound='c', command=plusOne, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
+    minusButton = tk.Button(text='-', image=pixelVirtual, width=3, height=6, compound='c', command=minusOne, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
+    undoButton = tk.Button(text='Undo', image=pixelVirtual, width=25, height=6, compound='c', command=undo, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
+    configButton = tk.Button(text='⚙', image=pixelVirtual, width=3, height=6, compound='c', command=configure, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
+    pauseButton = tk.Button(text='⏸︎', image=pixelVirtual, width=3, height=6, compound='c', command=togglePause, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
+    resetButton = tk.Button(text='Reset', image=pixelVirtual, width=25, height=6, compound='c', command=reset, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
 
 CreateToolTip(exitButton,'Exit')
 labeltip = CreateToolTip(label,f'Horde quantity: {quantity}\nSweet Scent Key: {scentKey}')
