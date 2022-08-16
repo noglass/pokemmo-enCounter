@@ -4,7 +4,7 @@
 
 import tkinter as tk
 
-globalFont = ( "Verdana", 10, "normal" )
+globalFont = ( "Verdana", 9, "normal" )
 
 # CreateToolTip by crxguy52
 # https://stackoverflow.com/a/36221216
@@ -184,14 +184,14 @@ root.bind('<B1-Motion>', onDrag)
 pixelVirtual = tk.PhotoImage(width=1, height=1)
 
 tk.Label(text='', bg='grey', fg='white', font=globalFont).grid(row=0, column=2)
-exitButton = tk.Button(text='×', image=pixelVirtual, width=3, height=8, compound='c', command=close, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
+exitButton = tk.Button(text='×', image=pixelVirtual, width=5, height=7, compound='c', command=close, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
 label = tk.Label(text='{:,}'.format(count), bg='grey', fg='white', font=globalFont)
-plusButton = tk.Button(text='+', image=pixelVirtual, width=3, height=4, compound='c', command=plusOne, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
-minusButton = tk.Button(text='-', image=pixelVirtual, width=3, height=4, compound='c', command=minusOne, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
-undoButton = tk.Button(text='Undo', image=pixelVirtual, width=30, height=4, compound='c', command=undo, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
-configButton = tk.Button(text='⚙', image=pixelVirtual, width=3, height=4, compound='c', command=configure, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
-pauseButton = tk.Button(text='⏸︎', image=pixelVirtual, width=3, height=4, compound='c', command=togglePause, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
-resetButton = tk.Button(text='Reset', image=pixelVirtual, width=30, height=4, compound='c', command=reset, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
+plusButton = tk.Button(text='+', image=pixelVirtual, width=10, height=7, compound='c', command=plusOne, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
+minusButton = tk.Button(text='-', image=pixelVirtual, width=10, height=7, compound='c', command=minusOne, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
+undoButton = tk.Button(text='Undo', image=pixelVirtual, width=30, height=7, compound='c', command=undo, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
+configButton = tk.Button(text='⚙', image=pixelVirtual, width=10, height=7, compound='c', command=configure, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
+pauseButton = tk.Button(text='⏸︎', image=pixelVirtual, width=10, height=7, compound='c', command=togglePause, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
+resetButton = tk.Button(text='Reset', image=pixelVirtual, width=30, height=7, compound='c', command=reset, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
 
 CreateToolTip(exitButton,'Exit')
 labeltip = CreateToolTip(label,f'Horde quantity: {quantity}\nSweet Scent Key: {scentKey}')
