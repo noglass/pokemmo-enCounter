@@ -90,8 +90,9 @@ def onDrag(event):
 
 def onUnClick(event):
     global lastClick
-    if lastClick[2] == 1:
-        save()
+    if lastClick != None:
+        if lastClick[2] == 1:
+            save()
     lastClick = None
 
 def plusOne():
