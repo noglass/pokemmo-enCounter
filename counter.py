@@ -4,6 +4,8 @@
 
 import tkinter as tk
 
+globalFont = ( "Verdana", 10, "normal" )
+
 # CreateToolTip by crxguy52
 # https://stackoverflow.com/a/36221216
 class CreateToolTip(object):
@@ -50,7 +52,7 @@ class CreateToolTip(object):
         self.tw.wm_geometry("+%d+%d" % (x, y))
         label = tk.Label(self.tw, text=self.text, justify='left',
                        background="#ffffff", relief='solid', borderwidth=1,
-                       wraplength = self.wraplength)
+                       wraplength = self.wraplength, font=globalFont)
         label.pack(ipadx=1)
 
     def hidetip(self):
@@ -151,7 +153,7 @@ def configure(retry=False):
         else:
             label.config(text='Enter the number of encounters per horde!')
         labeltip.setText('Press a single digit number corresponding to the horde count you are shunting.')
-    resizeToFit(label.winfo_reqwidth()+30)
+    resizeToFit(label.winfo_reqwidth())
     root.update()
     setKey += 1
 
@@ -181,16 +183,15 @@ root.bind('<ButtonRelease-1>', onUnClick)
 root.bind('<B1-Motion>', onDrag)
 pixelVirtual = tk.PhotoImage(width=1, height=1)
 
-tk.Label(text='', bg='grey', fg='white').grid(row=0, column=2)
-
-exitButton = tk.Button(text='×', image=pixelVirtual, width=1, height=7, compound='c', command=close, bg='grey', fg='white', activebackground='black', activeforeground='white')
-label = tk.Label(text='{:,}'.format(count), bg='grey', fg='white')
-plusButton = tk.Button(text='+', image=pixelVirtual, width=1, height=7, compound='c', command=plusOne, bg='grey', fg='white', activebackground='black', activeforeground='white')
-minusButton = tk.Button(text='-', image=pixelVirtual, width=1, height=7, compound='c', command=minusOne, bg='grey', fg='white', activebackground='black', activeforeground='white')
-undoButton = tk.Button(text='Undo', image=pixelVirtual, width=15, height=7, compound='c', command=undo, bg='grey', fg='white', activebackground='black', activeforeground='white')
-configButton = tk.Button(text='⚙', image=pixelVirtual, width=1, height=7, compound='c', command=configure, bg='grey', fg='white', activebackground='black', activeforeground='white')
-pauseButton = tk.Button(text='⏸︎', image=pixelVirtual, width=1, height=7, compound='c', command=togglePause, bg='grey', fg='white', activebackground='black', activeforeground='white')
-resetButton = tk.Button(text='Reset', image=pixelVirtual, width=15, height=7, compound='c', command=reset, bg='grey', fg='white', activebackground='black', activeforeground='white')
+tk.Label(text='', bg='grey', fg='white', font=globalFont).grid(row=0, column=2)
+exitButton = tk.Button(text='×', image=pixelVirtual, width=3, height=8, compound='c', command=close, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
+label = tk.Label(text='{:,}'.format(count), bg='grey', fg='white', font=globalFont)
+plusButton = tk.Button(text='+', image=pixelVirtual, width=3, height=4, compound='c', command=plusOne, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
+minusButton = tk.Button(text='-', image=pixelVirtual, width=3, height=4, compound='c', command=minusOne, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
+undoButton = tk.Button(text='Undo', image=pixelVirtual, width=30, height=4, compound='c', command=undo, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
+configButton = tk.Button(text='⚙', image=pixelVirtual, width=3, height=4, compound='c', command=configure, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
+pauseButton = tk.Button(text='⏸︎', image=pixelVirtual, width=3, height=4, compound='c', command=togglePause, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
+resetButton = tk.Button(text='Reset', image=pixelVirtual, width=30, height=4, compound='c', command=reset, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
 
 CreateToolTip(exitButton,'Exit')
 labeltip = CreateToolTip(label,f'Horde quantity: {quantity}\nSweet Scent Key: {scentKey}')
@@ -201,7 +202,7 @@ CreateToolTip(configButton,'Configure\nCtrl+Esc')
 CreateToolTip(pauseButton,'Pause\nAlt+Esc')
 CreateToolTip(resetButton,'Click this to reset your count to 0.\nCan be undone ;p')
 
-label.place(x=1,y=0)
+label.place(x=0,y=0)
 plusButton.grid(row=1, column=0, sticky='w', ipadx=0)
 minusButton.grid(row=1, column=1, sticky='w', ipadx=0)
 undoButton.grid(row=1, column=2, sticky='w', ipadx=0)
@@ -215,10 +216,11 @@ exitButton.place(x=winWidth-exitButton.winfo_reqwidth(),y=0)
 
 undoButton["state"] = "disabled"
 
-def resizeToFit(width = winWidth):
-    root.update_idletasks()
-    root.geometry(f'{width}x{root.winfo_height()}')
-    exitButton.place(x=width-exitButton.winfo_reqwidth(),y=0)
+exitWidth = exitButton.winfo_reqwidth()
+
+def resizeToFit(width = winWidth-exitWidth):
+    root.geometry(f'{width+exitWidth}x{root.winfo_height()}')
+    exitButton.place(x=width,y=0)
 
 try:
     from encounters import *
@@ -228,7 +230,7 @@ except Exception as e:
     wingeo = '+10+20'
     label.config(text='Press your Sweet Scent keybind!')
     labeltip.setText('Press the key you have bound to activate Sweet Scent.')
-    resizeToFit(label.winfo_reqwidth()+30)
+    resizeToFit(label.winfo_reqwidth())
 
 if isinstance(scentKey,str):
     scentKey = keyboard.KeyCode(char=scentKey)
