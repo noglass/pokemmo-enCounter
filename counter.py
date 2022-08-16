@@ -186,7 +186,7 @@ root.bind('<ButtonRelease-1>', onUnClick)
 root.bind('<B1-Motion>', onDrag)
 
 if platform == 'win32' or platform == 'cygwin':
-    tk.Label(text='', bg='grey', fg='white', font=( "Verdana", 15, "normal" )).grid(row=0, column=2)
+    tk.Label(text='', bg='grey', fg='white', font=( "Verdana", 12, "normal" )).grid(row=0, column=2)
     exitButton = tk.Button(text='×', width=2, command=close, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
     label = tk.Label(text='{:,}'.format(count), bg='grey', fg='white', font=globalFont)
     plusButton = tk.Button(text='+', width=2, command=plusOne, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
@@ -341,7 +341,7 @@ def on_release(key):
                 keyChar = key.char
             except AttributeError:
                 keyChar = 'n'
-            if keyChar.isdigit():
+            if keyChar.isdigit() and int(keyChar) > 0:
                 quantity = int(keyChar)
                 label.config(text='{:,}'.format(count))
                 labeltip.setText(f'Horde quantity: {quantity}\nSweet Scent Key: {scentKey}')
