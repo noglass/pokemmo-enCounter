@@ -1,0 +1,100 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2022-08-16 15:31+MDT\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: Chinese <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: counter.py:127
+msgid "PAUSED"
+msgstr "暂停中"
+
+#: counter.py:128
+msgid ""
+"Input is being paused!\n"
+"Press Alt+Esc to resume!"
+msgstr "正在暂停！\n按Alt+Esc继续！"
+
+msgid "Horde quantity"
+msgstr "群怪数量"
+
+msgid "Sweet Scent Key"
+msgstr "甜甜香气按键"
+
+#: counter.py:155
+msgid "Press your Sweet Scent keybind!"
+msgstr "请按下你的甜甜香气快捷键!"
+
+#: counter.py:156
+msgid "Press the key you have bound to activate Sweet Scent."
+msgstr "请按下您已经绑定的快捷键以激活甜甜香气"
+
+msgid "Please enter a valid number!"
+msgstr "请输入有效数字!"
+
+#: counter.py:162
+msgid "Enter the number of encounters per horde!"
+msgstr "请输入每次群怪的次数!"
+
+#: counter.py:163
+msgid "Press a single digit number corresponding to the horde count you are shunting."
+msgstr "输入一个与您每次群怪数量相等的数字"
+
+msgid "Undo"
+msgstr "撤销上次"
+
+msgid "Reset"
+msgstr "重置"
+
+#: counter.py:216
+msgid "Exit"
+msgstr ""
+
+#: counter.py:218
+msgid ""
+"Increase count\n"
+"Ctrl+'+' or Ctrl+'='\n"
+"To increase count by horde count press\n"
+"Ctrl+'*' or Ctrl+8"
+msgstr ""
+
+#: counter.py:219
+msgid ""
+"Decrease count\n"
+"Ctrl+'-'\n"
+"To decrease count by horde count press\n"
+"Ctrl+'/'"
+msgstr ""
+
+#: counter.py:220
+msgid "Ctrl+Z"
+msgstr ""
+
+#: counter.py:221
+msgid ""
+"Configure\n"
+"Ctrl+Esc"
+msgstr ""
+
+#: counter.py:222
+msgid ""
+"Pause\n"
+"Alt+Esc"
+msgstr ""
+
+#: counter.py:223
+msgid ""
+"Click this to reset your count to 0.\n"
+"Can be undone!"
+msgstr ""
+

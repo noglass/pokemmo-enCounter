@@ -1,0 +1,100 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2022-08-16 15:31+MDT\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: ENCODING\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: counter.py:127
+msgid "PAUSED"
+msgstr ""
+
+#: counter.py:128
+msgid ""
+"Input is being paused!\n"
+"Press Alt+Esc to resume!"
+msgstr ""
+
+msgid "Horde quantity"
+msgstr ""
+
+msgid "Sweet Scent Key"
+msgstr ""
+
+#: counter.py:155
+msgid "Press your Sweet Scent keybind!"
+msgstr ""
+
+#: counter.py:156
+msgid "Press the key you have bound to activate Sweet Scent."
+msgstr ""
+
+msgid "Please enter a valid number!"
+msgstr ""
+
+#: counter.py:162
+msgid "Enter the number of encounters per horde!"
+msgstr ""
+
+#: counter.py:163
+msgid "Press a single digit number corresponding to the horde count you are shunting."
+msgstr ""
+
+msgid "Undo"
+msgstr ""
+
+msgid "Reset"
+msgstr ""
+
+#: counter.py:216
+msgid "Exit"
+msgstr ""
+
+#: counter.py:218
+msgid ""
+"Increase count\n"
+"Ctrl+'+' or Ctrl+'='\n"
+"To increase count by horde count press\n"
+"Ctrl+'*' or Ctrl+8"
+msgstr ""
+
+#: counter.py:219
+msgid ""
+"Decrease count\n"
+"Ctrl+'-'\n"
+"To decrease count by horde count press\n"
+"Ctrl+'/'"
+msgstr ""
+
+#: counter.py:220
+msgid "Ctrl+Z"
+msgstr ""
+
+#: counter.py:221
+msgid ""
+"Configure\n"
+"Ctrl+Esc"
+msgstr ""
+
+#: counter.py:222
+msgid ""
+"Pause\n"
+"Alt+Esc"
+msgstr ""
+
+#: counter.py:223
+msgid ""
+"Click this to reset your count to 0.\n"
+"Can be undone!"
+msgstr ""
+
