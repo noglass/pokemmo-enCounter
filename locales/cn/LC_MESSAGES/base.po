@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "POT-Creation-Date: 2022-08-16 15:31+MDT\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Last-Translator: TheKingOfGlory <https://github.com/TheKingOfGlory>\n"
 "Language-Team: Chinese <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -51,7 +51,7 @@ msgid "Press a single digit number corresponding to the horde count you are shun
 msgstr "输入一个与您每次群怪数量相等的数字"
 
 msgid "Undo"
-msgstr "撤销上次"
+msgstr "撤销"
 
 msgid "Reset"
 msgstr "重置"
@@ -59,6 +59,7 @@ msgstr "重置"
 #: counter.py:216
 msgid "Exit"
 msgstr ""
+"退出"
 
 #: counter.py:218
 msgid ""
@@ -67,6 +68,10 @@ msgid ""
 "To increase count by horde count press\n"
 "Ctrl+'*' or Ctrl+8"
 msgstr ""
+"增加计数，请按\n"
+"\nCtrl+'+' 或者 Ctrl+'='\n"
+"如按群怪数量增加计数，请按"
+"\nCtrl+'*' 或者 Ctrl+8"
 
 #: counter.py:219
 msgid ""
@@ -75,26 +80,36 @@ msgid ""
 "To decrease count by horde count press\n"
 "Ctrl+'/'"
 msgstr ""
+"减少计数，请按\n"
+"Ctrl+'-'\n"
+"如按群怪数量减少计数，请按\n"
+"Ctrl+'/'"
 
 #: counter.py:220
 msgid "Ctrl+Z"
-msgstr ""
+msgstr "Ctrl+Z"
 
 #: counter.py:221
 msgid ""
 "Configure\n"
 "Ctrl+Esc"
 msgstr ""
+"设置\n"
+"Ctrl+Esc"
 
 #: counter.py:222
 msgid ""
 "Pause\n"
 "Alt+Esc"
 msgstr ""
+"暂停\n"
+"Alt+Esc"
 
 #: counter.py:223
 msgid ""
 "Click this to reset your count to 0.\n"
 "Can be undone!"
 msgstr ""
+"点击此按钮可将计数重置为0\n"
+"可以撤销！"
 

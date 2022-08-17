@@ -30,6 +30,30 @@ Holding your Sweet Scent key will *not* repeatedly increment!
 You can click and drag anywhere on the window to move it.  
 The script will remember where you moved it to the next time you open it.
 
+## Translations
+Current translations:
+* English (en)
+* Chinese (cn) by [TheKingOfGlory](https://github.com/TheKingOfGlory)
+
+Language specs can be added using the built-in `gettext` system.  
+
+When launching `counter.py` it attempts to select the language defined by your system, if a language spec exists for that language, it will be used. Otherwise it will fallback to English.  
+
+If the automatic language detection doesn't work you can manually set the language in the generated `encounters.py` file.:  
+
+If you have the `encounters.py` file skip to step 5
+
+1. Run `counter.py`
+2. Press your sweet scent button, followed by a number.
+3. Press the `+` button on the app.
+4. Press the `X` to close the app.
+5. Open the `encounters.py` file with any text editor (such as notepad)
+6. Locate the line that says `langSet = None` and change it to `langSet = ['cn']`
+7. Save and close the file.
+8. Run `counter.py`
+
+Now the app should be in Chinese! For other languages, just change the `cn` to the corresponding language abbreviation!
+
 ## Dependencies
 * pynput: `pip3 install pynput`
 * tkinter: `sudo apt-get install python3-tk`
