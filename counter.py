@@ -642,7 +642,7 @@ def linkBindings():
 linkBindings()
 
 if config == False:
-    configure(bind,True)
+    configure(None,True)
 
 displayCount()
 
