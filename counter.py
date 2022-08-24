@@ -3,15 +3,20 @@
 # https://github.com/noglass/pokemmo-enCounter
 
 import tkinter as tk
+from tkinter import messagebox
+from tkinter import ttk
+from tkinter import scrolledtext
 from sys import platform
 import gettext
+import copy
+import threading
 
 config = True
 langSet = None
 count = 0
 quantity = 5
 scentKey = None
-setKey = 0
+setKey = False
 last = [0] * 50
 undoPoint = 0
 modifier = False
@@ -19,6 +24,23 @@ altMod = False
 shiftMod = False
 superMod = False
 pause = False
+options = None
+current = set()
+theme = {
+    'foreground': 'white',
+    'background': 'grey',
+    'activebackground': 'black',
+    'activeforeground': 'white',
+    'disabledforeground': '#A0A0A0',
+    'pausedbackground': 'red',
+    'updatebackground': 'yellow'
+}
+
+def applyTheme(obj,full=False):
+    if full:
+        obj.configure(fg=theme['foreground'], bg=theme['background'], activeforeground=theme['activeforeground'], activebackground=theme['activebackground'], disabledforeground=theme['disabledforeground'])
+    else:
+        obj.configure(fg=theme['foreground'], bg=theme['background'])
 
 try:
     from encounters import *
@@ -26,12 +48,82 @@ except Exception as e:
     from pynput import keyboard
     wingeo = '+10+20'
     config = False
+    scentKey      = [[]]
+    plusKey       = [[keyboard.Key.ctrl,'+'],[keyboard.Key.ctrl,'=']]
+    minusKey      = [[keyboard.Key.ctrl,'-']]
+    minusHordeKey = [[keyboard.Key.ctrl,'/']]
+    undoKey       = [[keyboard.Key.ctrl,'z']]
+    configKey     = [[keyboard.Key.ctrl,keyboard.Key.esc]]
+    pauseKey      = [[keyboard.Key.alt,keyboard.Key.esc]]
+    resetKey      = [[]]
 
-try:
-    lang = gettext.translation('base', localedir='locales', languages=langSet)
-except Exception as e:
+kbc = keyboard.Controller()
+
+class Combo:
+    def __init__(self, keys, func=None, name=None):
+        self.keys = copy.deepcopy(keys)
+        self.func = func
+        self.name = name
+        self.enabled = True
+        self.len = len(keys)
+    
+    def enable(self):
+        self.enabled = True
+    
+    def disable(self):
+        self.enabled = False
+    
+    def match(self, keycombo):
+        global options, pause
+        if self.enabled and options == None and (pause == False or self.name == "pauseKey"):
+            curlen = len(keycombo)
+            if self.len == curlen and len(keycombo.intersection(self.keys)) == self.len:
+                if self.func != None:
+                    if self.len == 1 and self.name == "scentKey":
+                        self.disable()
+                    self.func(self)
+                return True
+        return False
+    
+    def write(self, file):
+        foo = False
+        file.write('[')
+        for key in self.keys:
+            if key == None:
+                continue
+            if foo:
+                file.write(',')
+            try:
+                file.write(f"'{key.char}'")
+            except AttributeError:
+                file.write(f"keyboard.{key}")
+            foo = True
+        file.write(']')
+    
+    def to_str(self):
+        foo = False
+        out = ""
+        for key in self.keys:
+            if key == None:
+                continue
+            if foo:
+                out += "+"
+            try:
+                out += str(key.char)
+            except AttributeError:
+                out += str(key)[4:]
+            foo = True
+        return out
+
+if langSet == None:
+    try:
+        lang = gettext.translation('base', localedir='locales')
+    except Exception as e:
+        lang = gettext.translation('base', localedir='locales', languages=['en'])
+else:
     langSet = None
-    lang = gettext.translation('base', localedir='locales', languages=['en'])
+    lang = gettext.translation('base', localedir='locales', languages=[langSet])
+
 lang.install()
 _ = lang.gettext
 
@@ -119,35 +211,36 @@ def onUnClick(event):
             save()
     lastClick = None
 
-def plusOne():
-    inc(1)
+def incHorde(bind=None):
+    inc(bind,quantity)
 
-def minusOne():
-    dec(1)
+def decHorde(bind=None):
+    dec(bind,quantity)
 
-def undo():
+def undo(bind=None):
     global count, last, undoPoint, undoButton
-    count += last[undoPoint]
-    undoPoint -= 1
-    if undoPoint < 0:
-        undoPoint = 0
-        last[undoPoint] = 0
-    if undoPoint == 0 and last[undoPoint] == 0:
-        undoButton["state"] = "disabled"
-    save()
+    if undoPoint > 0 or last[undoPoint] != 0:
+        count += last[undoPoint]
+        undoPoint -= 1
+        if undoPoint < 0:
+            undoPoint = 0
+            last[undoPoint] = 0
+        if undoPoint == 0 and last[undoPoint] == 0:
+            undoButton["state"] = "disabled"
+        save()
 
-def togglePause():
+def togglePause(bind=None):
     global pause, plusButton, minusButton, undoButton, configButton, resetButton
     pause = not pause
     if pause:
         label.config(text=_('PAUSED'))
-        labeltip.setText(_('Input is being paused!\nPress Alt+Esc to resume!'))
+        labeltip.setText(_('Input is being paused!'))
         plusButton["state"] = "disabled"
         minusButton["state"] = "disabled"
         undoButton["state"] = "disabled"
         configButton["state"] = "disabled"
         resetButton["state"] = "disabled"
-        setColor('red')
+        setColor(theme['pausedbackground'])
     else:
         displayCount()
         plusButton["state"] = "normal"
@@ -156,33 +249,241 @@ def togglePause():
         resetButton["state"] = "normal"
         if undoPoint > 0 or last[undoPoint] != 0:
             undoButton["state"] = "normal"
-        setColor('grey')
+        resetColor()
     root.update()
 
-def displayCount(resize=False):
+def displayCount():
     label.config(text='{:,}'.format(count))
-    labeltip.setText(f"{_('Horde quantity')}: {quantity}\n{_('Sweet Scent Key')}: {scentKey}")
-    if resize:
-        resizeToFit()
+    foo = False
+    key = ""
+    for k in keyBindings:
+        if k.name == "scentKey":
+            if foo:
+                key += " or "
+            key += k.to_str()
+            foo = True
+    labeltip.setText(f"{_('Horde quantity')}: {quantity}\n{_('Sweet Scent Key')}: {key}")
+    setColor(theme['updatebackground'])
+    threading.Timer(0.02,resetColor).start()
 
-def configure(retry=False):
-    global setKey
-    if setKey == 0:
-        label.config(text=_('Press your Sweet Scent keybind!'))
-        labeltip.setText(_('Press the key you have bound to activate Sweet Scent.'))
+def inc(bind=None,n=1):
+    global count, last, undoPoint, undoButton
+    count += n
+    undoPoint += 1
+    if undoPoint > 49:
+        last.pop(0)
+        last.append(n*-1)
+        undoPoint = 49
     else:
-        if retry:
-            label.config(text=f"{label.cget('text')} {_('Please enter a valid number!')}")
-            setKey -= 1
-        else:
-            label.config(text=_('Enter the number of encounters per horde!'))
-        labeltip.setText(_('Press a single digit number corresponding to the horde count you are shunting.'))
-    resizeToFit(label.winfo_reqwidth())
-    root.update()
-    setKey += 1
+        last[undoPoint] = n*-1
+    if undoButton["state"] == "disabled":
+        undoButton["state"] = "normal"
+    save()
 
-def reset():
-    dec(count)
+def dec(bind=None,n=1):
+    global count, last, undoPoint, undoButton
+    count -= n
+    undoPoint += 1
+    if undoPoint > 49:
+        last.pop(0)
+        last.append(n)
+        undoPoint = 49
+    else:
+        last[undoPoint] = n
+    if undoButton["state"] == "disabled":
+        undoButton["state"] = "normal"
+    save()
+
+def reset(bind=None):
+    dec(bind,count)
+
+cmdNames = ['scentKey', 'plusKey', 'minusKey', 'minusHordeKey', 'undoKey', 'configKey', 'pauseKey', 'resetKey']
+cmdDisplay = [_('Sweet Scent'), _('Increment'), _('Decrement'), _('Horde Decrement'), _('Undo'), _('Settings'), _('Pause'), _('Reset')]
+displayLength = 0
+for i in cmdDisplay:
+    j = len(i)
+    if j > displayLength:
+        displayLength = j
+displayLength += 1
+keylist = None
+binds = None
+tempBindings = None
+userCombo = None
+keybtn = None
+
+def configure(bind=None,scent=False):
+    global pause, options, keylist, binds, tempBindings, keyBindings, pauseButton
+    if options != None:
+        return
+    pause = False
+    togglePause()
+    pauseButton["state"] = "disabled"
+    
+    binds = list()
+    tempBindings = list()
+    
+    options = tk.Toplevel(root)
+    options.title(_('enCounter Settings'))
+    
+    def popList():
+        global keylist, binds, tempBindings
+        binds = list()
+        tempBindings = list()
+        for b in keyBindings:
+            name = cmdDisplay[cmdNames.index(b.name)]
+            binds.append(f"{name}:{' ' * (displayLength - len(name))}{b.to_str()}")
+            tempBindings.append(b)
+        if keylist == None:
+            keylist = tk.StringVar(value=binds)
+        else:
+            keylist.set(binds)
+    
+    popList()
+    tk.Label(options, text=_('Horde Count: '), font=globalFont).grid(row=3, column=0, padx=5, pady=5, sticky=tk.E)
+    hordesv = tk.StringVar(value=f'{quantity}')
+    hordesv.trace("w", lambda name, index, mode, hordesv=hordesv: on_edit(hordesv))
+    hordeBox = tk.Entry(options, textvariable=hordesv, font=globalFont, width=2)
+    hordeBox.grid(row=3, column=1, pady=5, sticky=tk.W)
+    bindlist = tk.Listbox(options, listvariable=keylist, width=37, height=10, selectmode='browse', font=("monospace", 9, "normal"))
+    bindlist.grid(row=1, column=0, columnspan=3, sticky=tk.E+tk.W)
+    
+    listScrollX = tk.Scrollbar(options, orient=tk.HORIZONTAL, command=bindlist.xview)
+    listScrollY = tk.Scrollbar(options, orient=tk.VERTICAL, command=bindlist.yview)
+    listScrollX.grid(row=2, columnspan=3, sticky=tk.E+tk.W)
+    listScrollY.grid(row=1, column=3, sticky=tk.N+tk.S)
+    bindlist['xscrollcommand'] = listScrollX.set
+    bindlist['yscrollcommand'] = listScrollY.set
+    
+    addbtn = tk.Button(options, text=_('Add'), font=globalFont)
+    delbtn = tk.Button(options, text=_('Remove'), font=globalFont)
+    savebtn = tk.Button(options, text=_('Save'), font=globalFont)
+    savebtn["state"] = "disabled"
+    delbtn["state"] = "disabled"
+    addbtn.grid(row=0, column=0, columnspan=2, pady=5)
+    delbtn.grid(row=0, column=1, columnspan=2, pady=5)
+    savebtn.grid(row=3, column=2, pady=5, sticky=tk.E)
+    
+    def closeOptions():
+        global pause, options, tempBindings, binds, keylist
+        options.destroy()
+        options.update()
+        options = None
+        tempBindings = None
+        binds = None
+        keylist = None
+        pause = True
+        togglePause()
+        pauseButton["state"] = "normal"
+    
+    def on_edit(sv=None):
+        nonlocal savebtn
+        savebtn["state"] = "normal"
+    
+    def on_select(event=None):
+        nonlocal delbtn
+        delbtn["state"] = "normal"
+    
+    bindlist.bind('<<ListboxSelect>>',on_select)
+    
+    
+    def on_save():
+        global quantity, tempBindings, keyBindings
+        try:
+            quantity = int(hordeBox.get())
+            keyBindings.clear()
+            #for k in tempBindings:
+            #    keyBindings.add(k)
+            keyBindings = set(copy.deepcopy(tempBindings))
+            save()
+            messagebox.showinfo(_("Success!"), _("Configuration saved!"), parent=options)
+            closeOptions()
+        except ValueError:
+            messagebox.showerror(_("Error"), _("Horde count must be a valid number!"), parent=options)
+    
+    def on_delete():
+        global binds, tempBindings
+        nonlocal delbtn
+        i = bindlist.curselection()
+        if len(i) > 0:
+            i = i[0]
+            del binds[i]
+            del tempBindings[i]
+            keylist.set(binds)
+            on_edit()
+        else:
+            delbtn["state"] = "disabled"
+    
+    def on_add(scent=False):
+        nonlocal hordeBox, addbtn, delbtn, bindlist
+        global setKey, keybtn
+        def on_keyPrompt(event=None):
+            global setKey
+            keybtn.configure(text=_('Press a key . . .'))
+            setKey = True
+        def on_newBind():
+            n = cmdDisplay.index(cmdbox.get())
+            userCombo.func = callback[n]
+            userCombo.name = cmdNames[n]
+            binds.append(f"{cmdDisplay[n]}:{' ' * (displayLength - len(cmdDisplay[n]))}{userCombo.to_str()}")
+            tempBindings.append(copy.deepcopy(userCombo))
+            keylist.set(binds)
+            on_edit()
+            closePrompt()
+        def closePrompt():
+            hordeBox["state"] = "normal"
+            addbtn["state"] = "normal"
+            if len(bindlist.curselection()) > 0:
+                delbtn["state"] = "normal"
+            bindlist["state"] = "normal"
+            prompt.destroy()
+            prompt.update()
+        
+        prompt = tk.Toplevel(options)
+        prompt.title(_("Create"))
+        hordeBox["state"] = "disabled"
+        addbtn["state"] = "disabled"
+        delbtn["state"] = "disabled"
+        bindlist["state"] = "disabled"
+        tk.Label(prompt, text=_("Command:")).grid(row=0,column=0,padx=5,pady=5)
+        cmdopt = tk.StringVar()
+        #cmdopt.trace('w',on_keyPrompt)
+        cmdbox = ttk.Combobox(prompt, textvariable=cmdopt)
+        cmdbox.bind('<<ComboboxSelected>>',on_keyPrompt)
+        cmdbox['values'] = cmdDisplay
+        cmdbox.grid(row=1,column=0,padx=5,pady=5)
+        #tk.Label(prompt, text="Key Bind:").grid(row=2,column=0,padx=5,pady=5)
+        keybtn = tk.Button(prompt, text=_('Assign Key'), command=on_keyPrompt)
+        keybtn.grid(row=2,column=0,columnspan=2,padx=5,pady=5)
+        okaybtn = tk.Button(prompt, text='Okay', padx=5, pady=5, command=on_newBind)
+        okaybtn.grid(row=3,column=0,columnspan=2, padx=15, pady=5)
+        prompt.protocol("WM_DELETE_WINDOW", closePrompt)
+        #prompt.wm_attributes("-topmost" , -1)
+        #prompt.after(1, lambda: prompt.focus_force())
+        if scent:
+            cmdbox.set(cmdDisplay[0])
+            cmdbox.current(0)
+            messagebox.showinfo(_("Attention"), _("Please assign your Sweet Scent Key!"), parent=prompt)
+            prompt.wm_attributes("-topmost" , -1)
+            #prompt.after(1, lambda: prompt.focus_force())
+        cmdbox.configure(state='readonly')
+    
+    
+    
+    addbtn.configure(command=on_add)
+    delbtn.configure(command=on_delete)
+    savebtn.configure(command=on_save)
+    
+    if scent:
+        on_add(scent)
+    
+    def on_close():
+        if savebtn["state"] == "disabled" or messagebox.askokcancel(_("Close"), _("Configuration has not been saved! Discard changes?"), parent=options):
+            closeOptions()
+            return False
+        return True
+    options.protocol("WM_DELETE_WINDOW", on_close)
+
+callback = [incHorde,inc,dec,decHorde,undo,configure,togglePause,reset]
 
 def setColor(color):
     root.configure(bg=color)
@@ -196,47 +497,97 @@ def setColor(color):
     undoButton.configure(bg=color)
     exitButton.configure(bg=color)
 
+def resetColor():
+    setColor(theme['background'])
+
 root = tk.Tk()
 root.attributes('-topmost', True)
 root.overrideredirect(True)
-root.title('enCounter')
+root.title(_('enCounter'))
 root.resizable(False, False)
 #root.attributes('-alpha', 0.5)
-root.configure(bg='grey')
+root.configure(bg=theme['background'])
 root.bind('<ButtonPress-1>', onClick)
 root.bind('<ButtonRelease-1>', onUnClick)
 root.bind('<B1-Motion>', onDrag)
 
+def save():
+    file = open('encounters.py', 'w')
+    file.write(f"""#!/bin/python3
+from pynput import keyboard
+
+# For Chinese use:
+# langSet = 'cn'
+langSet = {langSet}
+quantity = {quantity}
+count = {count}
+wingeo = "+{root.winfo_x()}+{root.winfo_y()}"
+
+# Key Bindings:
+""")
+    for n in cmdNames:
+        file.write(f'{n} = [')
+        foo = False
+        for b in keyBindings:
+            if b.name == n:
+                if foo:
+                    file.write(',')
+                b.write(file)
+                foo = True
+        file.write(']\n')
+    file.write('\n# Theme Settings:\ntheme = {\n')
+    foo = False
+    for k, v in theme.items():
+        if foo:
+            file.write(',\n')
+        file.write(f"    '{k}': '{v}'")
+        foo = True
+    file.write('\n}\n')
+    file.close()
+    if not pause:
+        displayCount()
+    root.update()
+
 if platform == 'win32' or platform == 'cygwin':
-    holder = tk.Label(text='', bg='grey', fg='white', font=( "Verdana", 12, "normal" ))
-    exitButton = tk.Button(text='×', width=2, command=close, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
-    label = tk.Label(text='{:,}'.format(count), bg='grey', fg='white', font=globalFont)
-    plusButton = tk.Button(text='+', width=2, command=plusOne, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
-    minusButton = tk.Button(text='-', width=2, command=minusOne, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
-    undoButton = tk.Button(text=_('Undo'), width=6, command=undo, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
-    configButton = tk.Button(text='⚙', width=2, command=configure, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
-    pauseButton = tk.Button(text='⏸︎', width=2, command=togglePause, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
-    resetButton = tk.Button(text=_('Reset'), width=6, command=reset, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
+    holder = tk.Label(text='', font=( "Verdana", 12, "normal" ))
+    exitButton = tk.Button(text='×', width=2, command=close, font=globalFont)
+    label = tk.Label(text='{:,}'.format(count), font=globalFont)
+    plusButton = tk.Button(text='+', width=2, command=inc, font=globalFont)
+    minusButton = tk.Button(text='-', width=2, command=dec, font=globalFont)
+    undoButton = tk.Button(text=_('Undo'), width=6, command=undo, font=globalFont)
+    configButton = tk.Button(text='⚙', width=2, command=configure, font=globalFont)
+    pauseButton = tk.Button(text='⏸︎', width=2, command=togglePause, font=globalFont)
+    resetButton = tk.Button(text=_('Reset'), width=6, command=reset, font=globalFont)
 else:
     pixelVirtual = tk.PhotoImage(width=1, height=1)
-    holder = tk.Label(text='', bg='grey', fg='white', font=globalFont)
-    exitButton = tk.Button(text='×', image=pixelVirtual, width=3, height=6, compound='c', command=close, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
-    label = tk.Label(text='', bg='grey', fg='white', font=globalFont)
-    plusButton = tk.Button(text='+', image=pixelVirtual, width=3, height=6, compound='c', command=plusOne, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
-    minusButton = tk.Button(text='-', image=pixelVirtual, width=3, height=6, compound='c', command=minusOne, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
-    undoButton = tk.Button(text=_('Undo'), image=pixelVirtual, width=25, height=6, compound='c', command=undo, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
-    configButton = tk.Button(text='⚙', image=pixelVirtual, width=3, height=6, compound='c', command=configure, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
-    pauseButton = tk.Button(text='⏸︎', image=pixelVirtual, width=3, height=6, compound='c', command=togglePause, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
-    resetButton = tk.Button(text=_('Reset'), image=pixelVirtual, width=25, height=6, compound='c', command=reset, bg='grey', fg='white', activebackground='black', activeforeground='white', font=globalFont)
+    holder = tk.Label(text='', font=globalFont)
+    exitButton = tk.Button(text='×', image=pixelVirtual, width=3, height=6, compound='c', command=close, font=globalFont)
+    label = tk.Label(text='', font=globalFont)
+    plusButton = tk.Button(text='+', image=pixelVirtual, width=3, height=6, compound='c', command=inc, font=globalFont)
+    minusButton = tk.Button(text='-', image=pixelVirtual, width=3, height=6, compound='c', command=dec, font=globalFont)
+    undoButton = tk.Button(text=_('Undo'), image=pixelVirtual, width=25, height=6, compound='c', command=undo, font=globalFont)
+    configButton = tk.Button(text='⚙', image=pixelVirtual, width=3, height=6, compound='c', command=configure, font=globalFont)
+    pauseButton = tk.Button(text='⏸︎', image=pixelVirtual, width=3, height=6, compound='c', command=togglePause, font=globalFont)
+    resetButton = tk.Button(text=_('Reset'), image=pixelVirtual, width=25, height=6, compound='c', command=reset, font=globalFont)
+
+applyTheme(holder)
+applyTheme(label)
+applyTheme(exitButton,True)
+applyTheme(plusButton,True)
+applyTheme(minusButton,True)
+applyTheme(undoButton,True)
+applyTheme(configButton,True)
+applyTheme(pauseButton,True)
+applyTheme(resetButton,True)
 
 CreateToolTip(exitButton,_('Exit'))
 labeltip = CreateToolTip(label,'')
-CreateToolTip(plusButton,_("Increase count\nCtrl+'+' or Ctrl+'='\nTo increase count by horde count press\nCtrl+'*' or Ctrl+8"))
-CreateToolTip(minusButton,_("Decrease count\nCtrl+'-'\nTo decrease count by horde count press\nCtrl+'/'"))
-CreateToolTip(undoButton,_('Ctrl+Z'))
-CreateToolTip(configButton,_('Configure\nCtrl+Esc'))
-CreateToolTip(pauseButton,_('Pause\nAlt+Esc'))
-CreateToolTip(resetButton,_('Click this to reset your count to 0.\nCan be undone!'))
+plusTip = CreateToolTip(plusButton,_("Increase count"))
+minusTip = CreateToolTip(minusButton,_("Decrease count"))
+CreateToolTip(undoButton,_('Undo the last action'))
+CreateToolTip(configButton,_('Configure'))
+CreateToolTip(pauseButton,_('Pause'))
+CreateToolTip(resetButton,_('Reset your count to 0.\nCan be undone!'))
 
 holder.grid(row=0, column=2)
 label.place(x=0,y=0)
@@ -259,119 +610,105 @@ def resizeToFit(width = winWidth-exitWidth):
     root.geometry(f'{width+exitWidth}x{root.winfo_height()}')
     exitButton.place(x=width,y=0)
 
-if config == False:
-    configure()
-    resizeToFit(label.winfo_reqwidth())
-
-if isinstance(scentKey,str):
-    scentKey = keyboard.KeyCode(char=scentKey)
-
 root.geometry(wingeo)
 
-if setKey == 0:
-    displayCount(True)
+keyBindings = set()
 
-def save():
-    if setKey == 0:
-        file = open('encounters.py', 'w')
-        try:
-            file.write(f'#!/bin/python3\nfrom pynput import keyboard\nlangSet = {langSet}\nquantity = {quantity}\ncount = {count}\nscentKey = \'{scentKey.char}\'\nwingeo = "+{root.winfo_x()}+{root.winfo_y()}"')
-        except AttributeError:
-            file.write(f'#!/bin/python3\nfrom pynput import keyboard\nlangSet = {langSet}\nquantity = {quantity}\ncount = {count}\nscentKey = keyboard.{scentKey}\nwingeo = "+{root.winfo_x()}+{root.winfo_y()}"')
-        file.close()
-        if not pause:
-            displayCount()
-        root.update()
+def sortKeys(c):
+    k = str(c)[4:]
+    try:
+        return ["shift","ctrl","alt","cmd"].index(k)
+    except ValueError:
+        if len(k) < 1:
+            return 4 + ord(str(c.char))
+    return 4 + ord(k[0])
+            
 
-def inc(n):
-    global count, last, undoPoint, undoButton
-    count += n
-    undoPoint += 1
-    if undoPoint > 49:
-        last.pop(0)
-        last.append(n*-1)
-        undoPoint = 49
-    else:
-        last[undoPoint] = n*-1
-    if undoButton["state"] == "disabled":
-        undoButton["state"] = "normal"
-    save()
+def linkBindings():
+    bindings = [scentKey,plusKey,minusKey,minusHordeKey,undoKey,configKey,pauseKey,resetKey]
+    i = 0
+    for bind in bindings:
+        if len(bind) > 0:
+            for combo in bind:
+                if len(combo) > 0:
+                    keys = list()
+                    for key in combo:
+                        if isinstance(key,str):
+                            key = keyboard.KeyCode(char=key)
+                        keys.append(key)
+                        keys.sort(key=sortKeys)
+                    keyBindings.add(Combo(keys,callback[i],cmdNames[i]))
+        i += 1
+linkBindings()
 
-def dec(n):
-    global count, last, undoPoint, undoButton
-    count -= n
-    undoPoint += 1
-    if undoPoint > 49:
-        last.pop(0)
-        last.append(n*-1)
-        undoPoint = 49
-    else:
-        last[undoPoint] = n
-    if undoButton["state"] == "disabled":
-        undoButton["state"] = "normal"
-    save()
+if config == False:
+    configure(bind,True)
+
+displayCount()
 
 def on_press(key):
-    global modifier, scentKey, setKey, altMod, shiftMod, superMod, undoButton
-    if pause == False and modifier == True and altMod == False and shiftMod == False and superMod == False:
-        if key == keyboard.KeyCode(char='+') or key == keyboard.KeyCode(char='='):
-            inc(1)
-        elif key == keyboard.KeyCode(char='*') or key == keyboard.KeyCode(char='8'):
-            inc(quantity)
-        elif key == keyboard.KeyCode(char='-'):
-            dec(1)
-        elif key == keyboard.KeyCode(char='/'):
-            dec(quantity)
-        elif key == keyboard.KeyCode(char='z'):
-            if undoPoint == 0 and last[undoPoint] == 0:
-                undoButton["state"] = "disabled"
-            else:
-                undo()
-        elif key == keyboard.Key.esc:
-            configure()
-        elif key == keyboard.KeyCode(char='h'):
-            setKey = 1
-            configure()
-    elif modifier == False and altMod == True and shiftMod == False and superMod == False:
-        if key == keyboard.Key.esc:
-            togglePause()
-    if key == keyboard.Key.ctrl or key == keyboard.Key.ctrl_l or key == keyboard.Key.ctrl_r:
-        modifier = True
-    elif key == keyboard.Key.alt or key == keyboard.Key.alt_l or key == keyboard.Key.alt_r or key == keyboard.Key.alt_gr:
-        altMod = True
-    elif key == keyboard.Key.shift or key == keyboard.Key.shift_l or key == keyboard.Key.shift_r:
-        shiftMod = True
-    elif key == keyboard.Key.cmd or key == keyboard.Key.cmd_l or key == keyboard.Key.cmd_r:
-        superMod = True
+    global setKey, userCombo
+    if key != None:
+        if key == keyboard.Key.ctrl_l or key == keyboard.Key.ctrl_r:
+            key = keyboard.Key.ctrl
+        elif key == keyboard.Key.alt_gr or key == keyboard.Key.alt_r or key == keyboard.Key.alt_l:
+            key = keyboard.Key.alt
+        elif key == keyboard.Key.shift_l or key == keyboard.Key.shift_r:
+            key = keyboard.Key.shift
+        elif key == keyboard.Key.cmd_l or key == keyboard.Key.cmd_r:
+            key = keyboard.Key.cmd
+        
+        
+        current.add(key)
+        
+        if not setKey:
+            if key == keyboard.Key.ctrl:
+                plusButton.configure(text=f'+{quantity}', command=incHorde)
+                minusButton.configure(text=f'-{quantity}', command=decHorde)
+                plusTip.setText(f"{_('Increase count by')} {quantity}")
+                minusTip.setText(f"{_('Decrease count by')} {quantity}")
+            
+            for c in keyBindings:
+                #if c.match(current) and c.name != 'pauseKey' and c.name != 'configKey':
+                c.match(current)
 
 def on_release(key):
-    global modifier, scentKey, setKey, quantity, altMod, shiftMod, superMod
-    if pause == False and modifier == False and altMod == False and shiftMod == False and superMod == False:
-        if setKey == 1:
-            scentKey = key
-            configure()
-        elif setKey == 2:
-            try:
-                keyChar = key.char
-            except AttributeError:
-                keyChar = 'n'
-            if keyChar.isdigit() and int(keyChar) > 0:
-                quantity = int(keyChar)
-                displayCount(True)
-                root.update()
-                setKey = 0
-            else:
-                configure(True)
-        elif key == scentKey:
-            inc(quantity)
-    if key == keyboard.Key.ctrl or key == keyboard.Key.ctrl_l or key == keyboard.Key.ctrl_r:
-        modifier = False
-    elif key == keyboard.Key.alt or key == keyboard.Key.alt_l or key == keyboard.Key.alt_r or key == keyboard.Key.alt_gr:
-        altMod = False
-    elif key == keyboard.Key.shift or key == keyboard.Key.shift_l or key == keyboard.Key.shift_r:
-        shiftMod = False
-    elif key == keyboard.Key.cmd or key == keyboard.Key.cmd_l or key == keyboard.Key.cmd_r:
-        superMod = False
+    global setKey, userCombo, current, keyBindings
+    if key != None:
+        if setKey:
+            userCombo = Combo(set(filter(None,current)))
+            keybtn.configure(text=userCombo.to_str())
+            setKey = False
+        if key == keyboard.Key.ctrl_l or key == keyboard.Key.ctrl_r:
+            key = keyboard.Key.ctrl
+        elif key == keyboard.Key.alt_gr or key == keyboard.Key.alt_r or key == keyboard.Key.alt_l:
+            key = keyboard.Key.alt
+        elif key == keyboard.Key.shift_l or key == keyboard.Key.shift_r:
+            key = keyboard.Key.shift
+        elif key == keyboard.Key.cmd_l or key == keyboard.Key.cmd_r:
+            key = keyboard.Key.cmd
+        
+        if key == keyboard.Key.ctrl:
+            plusButton.configure(text='+', command=inc)
+            minusButton.configure(text='-', command=dec)
+            plusTip.setText(_('Increase count'))
+            minusTip.setText(_('Decrease count'))
+        
+        activated = False
+        
+        for c in keyBindings:
+            curlen = len(current)
+            if c.name == "scentKey" and c.len == curlen and len(current.intersection(set(c.keys))) == c.len:
+                act = c.enable()
+                if not activated:
+                    activated = act
+        if not activated:
+            current.clear()
+    
+    try:
+        current.remove(key)
+    except KeyError:
+        current.clear()
 
 with keyboard.Listener(on_press=on_press, on_release=on_release) as listener:
     root.mainloop()

@@ -15,6 +15,8 @@ You can undo your last 50 actions. This includes resetting.
 You can pause the counter, disabling all key and button input, except for unpause and the exit button.
 
 ## Keybinds
+
+Default:  
 * Single Increment: `Ctrl+'+'` or `Ctrl+'='`
 * Increment By Horde Quantity: `Ctrl+'*'` or `Ctrl+8`
 * Single Decrement: `Ctrl+'-'`
@@ -26,6 +28,8 @@ You can pause the counter, disabling all key and button input, except for unpaus
 
 All of these bindings can be held to repeat the task.  
 Holding your Sweet Scent key will *not* repeatedly increment!  
+
+All of these commands (and more) can now be bound to whatever key combos you like in the interactive GUI!
 
 You can click and drag anywhere on the window to move it.  
 The script will remember where you moved it to the next time you open it.
@@ -39,7 +43,7 @@ Language specs can be added using the built-in `gettext` system.
 
 When launching `counter.py` it attempts to select the language defined by your system, if a language spec exists for that language, it will be used. Otherwise it will fallback to English.  
 
-If the automatic language detection doesn't work you can manually set the language in the generated `encounters.py` file.:  
+If the automatic language detection doesn't work you can manually set the language in the generated `encounters.py` file:  
 
 If you have the `encounters.py` file skip to step 5
 
@@ -53,6 +57,9 @@ If you have the `encounters.py` file skip to step 5
 8. Run `counter.py`
 
 Now the app should be in Chinese! For other languages, just change the `cn` to the corresponding language abbreviation!
+
+## Themes
+Now the `encounters.py` file supports customized color options!
 
 ## Dependencies
 * pynput: `pip3 install pynput`
