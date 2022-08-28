@@ -5,96 +5,165 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2022-08-16 15:31+MDT\n"
+"POT-Creation-Date: 2022-08-24 07:19+MDT\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=CHARSET\n"
-"Content-Transfer-Encoding: ENCODING\n"
-"Generated-By: pygettext.py 1.5\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: mad_gettext 1.0\n"
 
 
-#: counter.py:127
+#: counter.py:260
 msgid "PAUSED"
 msgstr ""
 
-#: counter.py:128
-msgid ""
-"Input is being paused!\n"
-"Press Alt+Esc to resume!"
+#: counter.py:261
+msgid "Input is being paused!"
 msgstr ""
 
+#: counter.py:289
 msgid "Horde quantity"
 msgstr ""
 
+#: counter.py:289
 msgid "Sweet Scent Key"
 msgstr ""
 
-#: counter.py:155
-msgid "Press your Sweet Scent keybind!"
+#: counter.py:325
+msgid "Sweet Scent"
 msgstr ""
 
-#: counter.py:156
-msgid "Press the key you have bound to activate Sweet Scent."
+#: counter.py:325
+msgid "Increment"
 msgstr ""
 
-msgid "Please enter a valid number!"
+#: counter.py:325
+msgid "Decrement"
 msgstr ""
 
-#: counter.py:162
-msgid "Enter the number of encounters per horde!"
+#: counter.py:325
+msgid "Horde Decrement"
 msgstr ""
 
-#: counter.py:163
-msgid "Press a single digit number corresponding to the horde count you are shunting."
-msgstr ""
-
+#: counter.py:325
 msgid "Undo"
 msgstr ""
 
+#: counter.py:325
+msgid "Settings"
+msgstr ""
+
+#: counter.py:325
+msgid "Pause"
+msgstr ""
+
+#: counter.py:325
 msgid "Reset"
 msgstr ""
 
-#: counter.py:216
+#: counter.py:350
+msgid "enCounter Settings"
+msgstr ""
+
+#: counter.py:366
+msgid "Horde Count: "
+msgstr ""
+
+#: counter.py:381
+msgid "Add"
+msgstr ""
+
+#: counter.py:382
+msgid "Remove"
+msgstr ""
+
+#: counter.py:383
+msgid "Save"
+msgstr ""
+
+#: counter.py:422
+msgid "Success!"
+msgstr ""
+
+#: counter.py:422
+msgid "Configuration saved!"
+msgstr ""
+
+#: counter.py:425
+msgid "Error"
+msgstr ""
+
+#: counter.py:425
+msgid "Horde count must be a valid number!"
+msgstr ""
+
+#: counter.py:445
+msgid "Press a key . . ."
+msgstr ""
+
+#: counter.py:466
+msgid "Create"
+msgstr ""
+
+#: counter.py:471
+msgid "Command:"
+msgstr ""
+
+#: counter.py:479
+msgid "Assign Key"
+msgstr ""
+
+#: counter.py:489
+msgid "Attention"
+msgstr ""
+
+#: counter.py:489
+msgid "Please assign your Sweet Scent Key!"
+msgstr ""
+
+#: counter.py:504
+msgid "Close"
+msgstr ""
+
+#: counter.py:504
+msgid "Configuration has not been saved! Discard changes?"
+msgstr ""
+
+#: counter.py:530
+msgid "enCounter"
+msgstr ""
+
+#: counter.py:607
 msgid "Exit"
 msgstr ""
 
-#: counter.py:218
-msgid ""
-"Increase count\n"
-"Ctrl+'+' or Ctrl+'='\n"
-"To increase count by horde count press\n"
-"Ctrl+'*' or Ctrl+8"
+#: counter.py:609
+msgid "Increase count"
 msgstr ""
 
-#: counter.py:219
-msgid ""
-"Decrease count\n"
-"Ctrl+'-'\n"
-"To decrease count by horde count press\n"
-"Ctrl+'/'"
+#: counter.py:610
+msgid "Decrease count"
 msgstr ""
 
-#: counter.py:220
-msgid "Ctrl+Z"
+#: counter.py:611
+msgid "Undo the last action"
 msgstr ""
 
-#: counter.py:221
-msgid ""
-"Configure\n"
-"Ctrl+Esc"
+#: counter.py:612
+msgid "Configure"
 msgstr ""
 
-#: counter.py:222
-msgid ""
-"Pause\n"
-"Alt+Esc"
+#: counter.py:614
+msgid "Reset your count to 0.\nCan be undone!"
 msgstr ""
 
-#: counter.py:223
-msgid ""
-"Click this to reset your count to 0.\n"
-"Can be undone!"
+#: counter.py:692
+msgid "Increase count by"
+msgstr ""
+
+#: counter.py:693
+msgid "Decrease count by"
 msgstr ""
 

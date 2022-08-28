@@ -7,6 +7,7 @@ from tkinter import messagebox
 from tkinter import ttk
 from tkinter import scrolledtext
 from sys import platform
+from glob import glob
 import gettext
 import copy
 import threading
@@ -115,17 +116,28 @@ class Combo:
             foo = True
         return out
 
-if langSet == None:
-    try:
-        lang = gettext.translation('base', localedir='locales')
-    except Exception as e:
-        lang = gettext.translation('base', localedir='locales', languages=['en'])
-else:
-    langSet = None
-    lang = gettext.translation('base', localedir='locales', languages=[langSet])
+lang = None
+languageSpecs = [t[8:t.find('/',8)] for t in glob('locales/*/LC_MESSAGES/base.mo')]
+languageSpecs.insert(0,'en')
 
-lang.install()
-_ = lang.gettext
+def installLanguage(spec):
+    global _, lang, langSet
+    if spec != 'en':
+        if spec in languageSpecs:
+            lang = gettext.translation('base', localedir='locales', languages=[spec])
+        else:
+            try:
+                lang = gettext.translation('base', localedir='locales')
+            except Exception as e:
+                _ = gettext.gettext
+                return 'en'
+        lang.install()
+        _ = lang.gettext
+    else:
+        _ = gettext.gettext
+    return spec
+
+langSet = installLanguage(langSet)
 
 globalFont = ( "Verdana", 9, "normal" )
 
@@ -344,6 +356,12 @@ def configure(bind=None,scent=False):
     hordesv.trace("w", lambda name, index, mode, hordesv=hordesv: on_edit(hordesv))
     hordeBox = tk.Entry(options, textvariable=hordesv, font=globalFont, width=2)
     hordeBox.grid(row=3, column=1, pady=5, sticky=tk.W)
+    tk.Label(options, text=_('Language: '), font=globalFont).grid(row=4, column=0, padx=5, pady=5, sticky=tk.E)
+    langsv = tk.StringVar()
+    langsv.set(langSet)
+    langsv.trace("w", lambda name, index, mode, langsv=langsv: on_edit(langsv))
+    langDrop = tk.OptionMenu(options, langsv, *languageSpecs)
+    langDrop.grid(row=4, column=1, pady=5, sticky=tk.W)
     bindlist = tk.Listbox(options, listvariable=keylist, width=37, height=10, selectmode='browse', font=("monospace", 9, "normal"))
     bindlist.grid(row=1, column=0, columnspan=3, sticky=tk.E+tk.W)
     
@@ -361,7 +379,7 @@ def configure(bind=None,scent=False):
     delbtn["state"] = "disabled"
     addbtn.grid(row=0, column=0, columnspan=2, pady=5)
     delbtn.grid(row=0, column=1, columnspan=2, pady=5)
-    savebtn.grid(row=3, column=2, pady=5, sticky=tk.E)
+    savebtn.grid(row=4, column=2, pady=5, sticky=tk.E)
     
     def closeOptions():
         global pause, options, tempBindings, binds, keylist
@@ -387,15 +405,20 @@ def configure(bind=None,scent=False):
     
     
     def on_save():
-        global quantity, tempBindings, keyBindings
+        global quantity, tempBindings, keyBindings, langSet
         try:
             quantity = int(hordeBox.get())
+            oldLang = langSet
+            langSet = installLanguage(langsv.get())
             keyBindings.clear()
-            #for k in tempBindings:
-            #    keyBindings.add(k)
             keyBindings = set(copy.deepcopy(tempBindings))
             save()
-            messagebox.showinfo(_("Success!"), _("Configuration saved!"), parent=options)
+            if langSet != oldLang:
+                messagebox.showinfo(_("Success!"), _("Configuration saved! Some settings require the program to be restarted!"), parent=options)
+                close()
+                return
+            else:
+                messagebox.showinfo(_("Success!"), _("Configuration saved!"), parent=options)
             closeOptions()
         except ValueError:
             messagebox.showerror(_("Error"), _("Horde count must be a valid number!"), parent=options)
@@ -421,7 +444,7 @@ def configure(bind=None,scent=False):
             keybtn.configure(text=_('Press a key . . .'))
             setKey = True
         def on_newBind():
-            n = cmdDisplay.index(cmdbox.get())
+            n = cmdDisplay.index(cmdopt.get())
             userCombo.func = callback[n]
             userCombo.name = cmdNames[n]
             binds.append(f"{cmdDisplay[n]}:{' ' * (displayLength - len(cmdDisplay[n]))}{userCombo.to_str()}")
@@ -445,13 +468,12 @@ def configure(bind=None,scent=False):
         delbtn["state"] = "disabled"
         bindlist["state"] = "disabled"
         tk.Label(prompt, text=_("Command:")).grid(row=0,column=0,padx=5,pady=5)
+        
         cmdopt = tk.StringVar()
-        #cmdopt.trace('w',on_keyPrompt)
-        cmdbox = ttk.Combobox(prompt, textvariable=cmdopt)
-        cmdbox.bind('<<ComboboxSelected>>',on_keyPrompt)
-        cmdbox['values'] = cmdDisplay
+        cmdopt.trace("w", lambda name, index, mode, cmdopt=cmdopt: on_keyPrompt(langsv))
+        cmdbox = tk.OptionMenu(prompt, cmdopt, *cmdDisplay)
         cmdbox.grid(row=1,column=0,padx=5,pady=5)
-        #tk.Label(prompt, text="Key Bind:").grid(row=2,column=0,padx=5,pady=5)
+        
         keybtn = tk.Button(prompt, text=_('Assign Key'), command=on_keyPrompt)
         keybtn.grid(row=2,column=0,columnspan=2,padx=5,pady=5)
         okaybtn = tk.Button(prompt, text='Okay', padx=5, pady=5, command=on_newBind)
@@ -460,14 +482,10 @@ def configure(bind=None,scent=False):
         #prompt.wm_attributes("-topmost" , -1)
         #prompt.after(1, lambda: prompt.focus_force())
         if scent:
-            cmdbox.set(cmdDisplay[0])
-            cmdbox.current(0)
+            cmdopt.set(cmdDisplay[0])
             messagebox.showinfo(_("Attention"), _("Please assign your Sweet Scent Key!"), parent=prompt)
             prompt.wm_attributes("-topmost" , -1)
             #prompt.after(1, lambda: prompt.focus_force())
-        cmdbox.configure(state='readonly')
-    
-    
     
     addbtn.configure(command=on_add)
     delbtn.configure(command=on_delete)
@@ -518,7 +536,7 @@ from pynput import keyboard
 
 # For Chinese use:
 # langSet = 'cn'
-langSet = {langSet}
+langSet = '{langSet}'
 quantity = {quantity}
 count = {count}
 wingeo = "+{root.winfo_x()}+{root.winfo_y()}"
