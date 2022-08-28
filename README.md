@@ -8,7 +8,7 @@ enCounter is an extremely lightweight and cross-platform Python3 script that cre
 This script works a bit differently than the existing ones, the main difference is that this does not use any sort of screen capturing to count the encounters!  
 Instead, this lets you configure what key you have set to activate Sweet Scent and how many Pokemon are in each horde (you can set this to 1 for single shunting).  
 
-There are also manual increment, decrement, horde increment, horde decrement, and undo buttons (and keybinds) for fine tuning.  
+There are also manual increment, decrement, horde increment (sweet scent), horde decrement, and undo buttons (and keybinds) for fine tuning.  
 
 You can undo your last 50 actions. This includes resetting.  
 
@@ -17,19 +17,19 @@ You can pause the counter, disabling all key and button input, except for unpaus
 ## Keybinds
 
 Default:  
+* Sweet Scent: `Unbound`
 * Single Increment: `Ctrl+'+'` or `Ctrl+'='`
-* Increment By Horde Quantity: `Ctrl+'*'` or `Ctrl+8`
 * Single Decrement: `Ctrl+'-'`
 * Decrement By Horde Quantity: `Ctrl+'/'`
-* Undo (Up To the Last 50 Actions): `Ctrl+Z`
+* Undo: `Ctrl+Z`
 * Pause/Unpause: `Alt+Esc`
-* Configure Sweet Scent Key and Horde Quantity: `Ctrl+Esc`
-* Configure Only Horde Quantity: `Ctrl+H`
+* Configuration Menu: `Ctrl+Esc`
+* Reset Count: `Unbound`
 
 All of these bindings can be held to repeat the task.  
 Holding your Sweet Scent key will *not* repeatedly increment!  
 
-All of these commands (and more) can now be bound to whatever key combos you like in the interactive GUI!
+All of these commands can now be bound to whatever key combos you like in the interactive configuration menu!
 
 You can click and drag anywhere on the window to move it.  
 The script will remember where you moved it to the next time you open it.
@@ -40,23 +40,11 @@ Current translations:
 * Chinese (cn) by [TheKingOfGlory](https://github.com/TheKingOfGlory)
 
 Language specs can be added using the built-in `gettext` system.  
+The `./locales/base.pot` file is a template file you can use to create new translations in the format of `./locales/{language}/LC_MESSAGES/base.po`, then run the `msgfmt` tool to compile the `./locales/{language}/LC_MESSAGES/base.mo` file, where `{language}` is the two letter abbreviation for the spec.  
 
 When launching `counter.py` it attempts to select the language defined by your system, if a language spec exists for that language, it will be used. Otherwise it will fallback to English.  
 
-If the automatic language detection doesn't work you can manually set the language in the generated `encounters.py` file:  
-
-If you have the `encounters.py` file skip to step 5
-
-1. Run `counter.py`
-2. Press your sweet scent button, followed by a number.
-3. Press the `+` button on the app.
-4. Press the `X` to close the app.
-5. Open the `encounters.py` file with any text editor (such as notepad)
-6. Locate the line that says `langSet = None` and change it to `langSet = ['cn']`
-7. Save and close the file.
-8. Run `counter.py`
-
-Now the app should be in Chinese! For other languages, just change the `cn` to the corresponding language abbreviation!
+If the automatic language detection doesn't work you can press the settings button, `⚙`, and select your preferred language.
 
 ## Themes
 Now the `encounters.py` file supports customized color options!
