@@ -27,6 +27,7 @@ superMod = False
 pause = False
 options = None
 current = set()
+initialCount = 0
 theme = {
     'foreground': 'white',
     'background': 'grey',
@@ -45,6 +46,7 @@ def applyTheme(obj,full=False):
 
 try:
     from encounters import *
+    initialCount = count
 except Exception as e:
     from pynput import keyboard
     wingeo = '+10+20'
@@ -58,6 +60,8 @@ except Exception as e:
     pauseKey      = [[keyboard.Key.alt,keyboard.Key.esc]]
     resetKey      = [[]]
 
+print(f'Initializing count to {initialCount} . . .')
+
 kbc = keyboard.Controller()
 
 class Combo:
@@ -67,22 +71,32 @@ class Combo:
         self.name = name
         self.enabled = True
         self.len = len(keys)
+        self.special = False
+        if self.len == 1 and self.name == "scentKey":
+            self.special = True
     
     def enable(self):
         self.enabled = True
     
     def disable(self):
-        self.enabled = False
+        if self.special:
+            self.enabled = False
     
-    def match(self, keycombo):
+    def match(self, keycombo, curlen):
         global options, pause
         if self.enabled and options == None and (pause == False or self.name == "pauseKey"):
-            curlen = len(keycombo)
-            if self.len == curlen and len(keycombo.intersection(self.keys)) == self.len:
+            if (self.special and self.keys[0] in keycombo) or (self.len == curlen and len(keycombo.intersection(self.keys)) == self.len):
+                self.disable()
                 if self.func != None:
-                    if self.len == 1 and self.name == "scentKey":
-                        self.disable()
                     self.func(self)
+                return True
+        return False
+    
+    def release(self, keycombo, curlen):
+        global options, pause
+        if self.enabled == False:
+            if (self.len == 1 and self.keys[0] in keycombo) or (self.len == curlen and len(keycombo.intersection(self.keys)) == self.len):
+                self.enable()
                 return True
         return False
     
@@ -274,7 +288,10 @@ def displayCount():
                 key += " or "
             key += k.to_str()
             foo = True
-    labeltip.setText(f"{_('Horde quantity')}: {quantity}\n{_('Sweet Scent Key')}: {key}")
+    session = count-initialCount
+    totaldepl = count/quantity/6
+    sessiondepl = session/quantity/6
+    labeltip.setText(f"{_('Total Sweet Scents')}: {count/quantity:.2f}\n{_('Session Sweet Scents')}: {session/quantity:.2f}\n\n{_('Session encounters')}: {session}\n\n{_('Total depletions')}: {totaldepl:.2f}\n{_('Session depletions')}: {sessiondepl:.2f}\n{_('(Exhausted all Sweet Scent PP, assuming horde quantity is constant.)')}\n\n{_('Total Max Leppas')}: {totaldepl*3:.2f}\n{_('Session Leppas')}: {sessiondepl*3:.2f}")
     setColor(theme['updatebackground'])
     threading.Timer(0.02,resetColor).start()
 
@@ -322,6 +339,50 @@ binds = None
 tempBindings = None
 userCombo = None
 keybtn = None
+
+root = tk.Tk()
+root.attributes('-topmost', True)
+root.overrideredirect(True)
+root.title(_('enCounter'))
+root.resizable(False, False)
+#root.attributes('-alpha', 0.5)
+root.configure(bg=theme['background'])
+root.bind('<ButtonPress-1>', onClick)
+root.bind('<ButtonRelease-1>', onUnClick)
+root.bind('<B1-Motion>', onDrag)
+
+if platform == 'win32' or platform == 'cygwin':
+    holder = tk.Label(text='', font=( "Verdana", 12, "normal" ))
+    exitButton = tk.Button(text='×', width=2, command=close, font=globalFont)
+    label = tk.Label(text='{:,}'.format(count), font=globalFont)
+    plusButton = tk.Button(text='+', width=2, command=inc, font=globalFont)
+    minusButton = tk.Button(text='-', width=2, command=dec, font=globalFont)
+    undoButton = tk.Button(text=_('Undo'), width=6, command=undo, font=globalFont)
+    configButton = tk.Button(text='⚙', width=2, font=globalFont)
+    pauseButton = tk.Button(text='⏸︎', width=2, command=togglePause, font=globalFont)
+    resetButton = tk.Button(text=_('Reset'), width=6, command=reset, font=globalFont)
+else:
+    pixelVirtual = tk.PhotoImage(width=1, height=1)
+    holder = tk.Label(text='', font=globalFont)
+    exitButton = tk.Button(text='×', image=pixelVirtual, width=3, height=6, compound='c', command=close, font=globalFont)
+    label = tk.Label(text='', font=globalFont)
+    plusButton = tk.Button(text='+', image=pixelVirtual, width=3, height=6, compound='c', command=inc, font=globalFont)
+    minusButton = tk.Button(text='-', image=pixelVirtual, width=3, height=6, compound='c', command=dec, font=globalFont)
+    undoButton = tk.Button(text=_('Undo'), image=pixelVirtual, width=25, height=6, compound='c', command=undo, font=globalFont)
+    configButton = tk.Button(text='⚙', image=pixelVirtual, width=3, height=6, compound='c', font=globalFont)
+    pauseButton = tk.Button(text='⏸︎', image=pixelVirtual, width=3, height=6, compound='c', command=togglePause, font=globalFont)
+    resetButton = tk.Button(text=_('Reset'), image=pixelVirtual, width=25, height=6, compound='c', command=reset, font=globalFont)
+
+def applyThemes():
+    applyTheme(holder)
+    applyTheme(label)
+    applyTheme(exitButton,True)
+    applyTheme(plusButton,True)
+    applyTheme(minusButton,True)
+    applyTheme(undoButton,True)
+    applyTheme(configButton,True)
+    applyTheme(pauseButton,True)
+    applyTheme(resetButton,True)
 
 def configure(bind=None,scent=False):
     global pause, options, keylist, binds, tempBindings, keyBindings, pauseButton
@@ -375,11 +436,14 @@ def configure(bind=None,scent=False):
     addbtn = tk.Button(options, text=_('Add'), font=globalFont)
     delbtn = tk.Button(options, text=_('Remove'), font=globalFont)
     savebtn = tk.Button(options, text=_('Save'), font=globalFont)
+    themebtn = tk.Button(options, text=_('Appearance'), font=globalFont)
     savebtn["state"] = "disabled"
     delbtn["state"] = "disabled"
+    themebtn["state"] = "disabled"
     addbtn.grid(row=0, column=0, columnspan=2, pady=5)
     delbtn.grid(row=0, column=1, columnspan=2, pady=5)
     savebtn.grid(row=4, column=2, pady=5, sticky=tk.E)
+    themebtn.grid(row=3, column=2, pady=5, sticky=tk.E)
     
     def closeOptions():
         global pause, options, tempBindings, binds, keylist
@@ -403,6 +467,10 @@ def configure(bind=None,scent=False):
     
     bindlist.bind('<<ListboxSelect>>',on_select)
     
+    def on_theme():
+        themeWindow = tk.Toplevel(options)
+        themeWindow.title(_('Appearance'))
+        
     
     def on_save():
         global quantity, tempBindings, keyBindings, langSet
@@ -490,6 +558,7 @@ def configure(bind=None,scent=False):
     addbtn.configure(command=on_add)
     delbtn.configure(command=on_delete)
     savebtn.configure(command=on_save)
+    themebtn.configure(command=on_theme)
     
     if scent:
         on_add(scent)
@@ -500,6 +569,8 @@ def configure(bind=None,scent=False):
             return False
         return True
     options.protocol("WM_DELETE_WINDOW", on_close)
+
+configButton.configure(command=configure)
 
 callback = [incHorde,inc,dec,decHorde,undo,configure,togglePause,reset]
 
@@ -518,24 +589,11 @@ def setColor(color):
 def resetColor():
     setColor(theme['background'])
 
-root = tk.Tk()
-root.attributes('-topmost', True)
-root.overrideredirect(True)
-root.title(_('enCounter'))
-root.resizable(False, False)
-#root.attributes('-alpha', 0.5)
-root.configure(bg=theme['background'])
-root.bind('<ButtonPress-1>', onClick)
-root.bind('<ButtonRelease-1>', onUnClick)
-root.bind('<B1-Motion>', onDrag)
-
 def save():
     file = open('encounters.py', 'w')
     file.write(f"""#!/bin/python3
 from pynput import keyboard
 
-# For Chinese use:
-# langSet = 'cn'
 langSet = '{langSet}'
 quantity = {quantity}
 count = {count}
@@ -566,42 +624,12 @@ wingeo = "+{root.winfo_x()}+{root.winfo_y()}"
         displayCount()
     root.update()
 
-if platform == 'win32' or platform == 'cygwin':
-    holder = tk.Label(text='', font=( "Verdana", 12, "normal" ))
-    exitButton = tk.Button(text='×', width=2, command=close, font=globalFont)
-    label = tk.Label(text='{:,}'.format(count), font=globalFont)
-    plusButton = tk.Button(text='+', width=2, command=inc, font=globalFont)
-    minusButton = tk.Button(text='-', width=2, command=dec, font=globalFont)
-    undoButton = tk.Button(text=_('Undo'), width=6, command=undo, font=globalFont)
-    configButton = tk.Button(text='⚙', width=2, command=configure, font=globalFont)
-    pauseButton = tk.Button(text='⏸︎', width=2, command=togglePause, font=globalFont)
-    resetButton = tk.Button(text=_('Reset'), width=6, command=reset, font=globalFont)
-else:
-    pixelVirtual = tk.PhotoImage(width=1, height=1)
-    holder = tk.Label(text='', font=globalFont)
-    exitButton = tk.Button(text='×', image=pixelVirtual, width=3, height=6, compound='c', command=close, font=globalFont)
-    label = tk.Label(text='', font=globalFont)
-    plusButton = tk.Button(text='+', image=pixelVirtual, width=3, height=6, compound='c', command=inc, font=globalFont)
-    minusButton = tk.Button(text='-', image=pixelVirtual, width=3, height=6, compound='c', command=dec, font=globalFont)
-    undoButton = tk.Button(text=_('Undo'), image=pixelVirtual, width=25, height=6, compound='c', command=undo, font=globalFont)
-    configButton = tk.Button(text='⚙', image=pixelVirtual, width=3, height=6, compound='c', command=configure, font=globalFont)
-    pauseButton = tk.Button(text='⏸︎', image=pixelVirtual, width=3, height=6, compound='c', command=togglePause, font=globalFont)
-    resetButton = tk.Button(text=_('Reset'), image=pixelVirtual, width=25, height=6, compound='c', command=reset, font=globalFont)
-
-applyTheme(holder)
-applyTheme(label)
-applyTheme(exitButton,True)
-applyTheme(plusButton,True)
-applyTheme(minusButton,True)
-applyTheme(undoButton,True)
-applyTheme(configButton,True)
-applyTheme(pauseButton,True)
-applyTheme(resetButton,True)
+applyThemes()
 
 CreateToolTip(exitButton,_('Exit'))
 labeltip = CreateToolTip(label,'')
-plusTip = CreateToolTip(plusButton,_("Increase count"))
-minusTip = CreateToolTip(minusButton,_("Decrease count"))
+plusTip = CreateToolTip(plusButton,_('Increase count'))
+minusTip = CreateToolTip(minusButton,_('Decrease count'))
 CreateToolTip(undoButton,_('Undo the last action'))
 CreateToolTip(configButton,_('Configure'))
 CreateToolTip(pauseButton,_('Pause'))
@@ -640,7 +668,6 @@ def sortKeys(c):
         if len(k) < 1:
             return 4 + ord(str(c.char))
     return 4 + ord(k[0])
-            
 
 def linkBindings():
     bindings = [scentKey,plusKey,minusKey,minusHordeKey,undoKey,configKey,pauseKey,resetKey]
@@ -664,6 +691,8 @@ if config == False:
 
 displayCount()
 
+modifiers = [ keyboard.Key.ctrl, keyboard.Key.alt, keyboard.Key.shift, keyboard.Key.cmd ]
+
 def on_press(key):
     global setKey, userCombo
     if key != None:
@@ -676,7 +705,6 @@ def on_press(key):
         elif key == keyboard.Key.cmd_l or key == keyboard.Key.cmd_r:
             key = keyboard.Key.cmd
         
-        
         current.add(key)
         
         if not setKey:
@@ -686,9 +714,13 @@ def on_press(key):
                 plusTip.setText(f"{_('Increase count by')} {quantity}")
                 minusTip.setText(f"{_('Decrease count by')} {quantity}")
             
-            for c in keyBindings:
-                #if c.match(current) and c.name != 'pauseKey' and c.name != 'configKey':
-                c.match(current)
+            curlen = len(current)
+            if curlen > 1 and len(current.intersection(modifiers)) == 0:
+                for c in keyBindings:
+                    c.match({key},1)
+            else:
+                for c in keyBindings:
+                    c.match(current,curlen)
 
 def on_release(key):
     global setKey, userCombo, current, keyBindings
@@ -714,12 +746,11 @@ def on_release(key):
         
         activated = False
         
+        curlen = len(current)
         for c in keyBindings:
-            curlen = len(current)
-            if c.name == "scentKey" and c.len == curlen and len(current.intersection(set(c.keys))) == c.len:
-                act = c.enable()
-                if not activated:
-                    activated = act
+            act = c.release(current,curlen)
+            if not activated:
+                activated = act
         if not activated:
             current.clear()
     
