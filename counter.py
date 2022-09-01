@@ -291,7 +291,7 @@ def displayCount():
     session = count-initialCount
     totaldepl = count/quantity/6
     sessiondepl = session/quantity/6
-    labeltip.setText(f"{_('Total Sweet Scents')}: {count/quantity:.2f}\n{_('Session Sweet Scents')}: {session/quantity:.2f}\n\n{_('Session encounters')}: {session}\n\n{_('Total depletions')}: {totaldepl:.2f}\n{_('Session depletions')}: {sessiondepl:.2f}\n{_('(Exhausted all Sweet Scent PP, assuming horde quantity is constant.)')}\n\n{_('Total Max Leppas')}: {totaldepl*3:.2f}\n{_('Session Leppas')}: {sessiondepl*3:.2f}")
+    labeltip.setText(f"{_('Total Sweet Scents')}: {count/quantity}\n{_('Session Sweet Scents')}: {session/quantity}\n\n{_('Session encounters')}: {session}\n\n{_('Total depletions')}: {totaldepl:.2f}\n{_('Session depletions')}: {sessiondepl:.2f}\n{_('(Exhausted all Sweet Scent PP, assuming horde quantity is constant.)')}\n\n{_('Total Max Leppas')}: {totaldepl*3:.2f}\n{_('Session Leppas')}: {sessiondepl*3:.2f}")
     setColor(theme['updatebackground'])
     threading.Timer(0.02,resetColor).start()
 

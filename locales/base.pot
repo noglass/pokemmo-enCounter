@@ -10,160 +10,196 @@ msgstr ""
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: ENCODING\n"
 "Generated-By: mad_gettext 1.0\n"
 
 
-#: counter.py:260
+#: counter.py:262
 msgid "PAUSED"
 msgstr ""
 
-#: counter.py:261
+#: counter.py:263
 msgid "Input is being paused!"
 msgstr ""
 
-#: counter.py:289
-msgid "Horde quantity"
+#: counter.py:294
+msgid "Total Sweet Scents"
 msgstr ""
 
-#: counter.py:289
-msgid "Sweet Scent Key"
+#: counter.py:294
+msgid "Session Sweet Scents"
 msgstr ""
 
-#: counter.py:325
+#: counter.py:294
+msgid "Session encounters"
+msgstr ""
+
+#: counter.py:294
+msgid "Total depletions"
+msgstr ""
+
+#: counter.py:294
+msgid "Session depletions"
+msgstr ""
+
+#: counter.py:294
+msgid "(Exhausted all Sweet Scent PP, assuming horde quantity is constant.)"
+msgstr ""
+
+#: counter.py:294
+msgid "Total Max Leppas"
+msgstr ""
+
+#: counter.py:294
+msgid "Session Leppas"
+msgstr ""
+
+#: counter.py:330
 msgid "Sweet Scent"
 msgstr ""
 
-#: counter.py:325
+#: counter.py:330
 msgid "Increment"
 msgstr ""
 
-#: counter.py:325
+#: counter.py:330
 msgid "Decrement"
 msgstr ""
 
-#: counter.py:325
+#: counter.py:330
 msgid "Horde Decrement"
 msgstr ""
 
-#: counter.py:325
+#: counter.py:330
 msgid "Undo"
 msgstr ""
 
-#: counter.py:325
+#: counter.py:330
 msgid "Settings"
 msgstr ""
 
-#: counter.py:325
+#: counter.py:330
 msgid "Pause"
 msgstr ""
 
-#: counter.py:325
+#: counter.py:330
 msgid "Reset"
 msgstr ""
 
-#: counter.py:350
-msgid "enCounter Settings"
-msgstr ""
-
-#: counter.py:366
-msgid "Horde Count: "
-msgstr ""
-
-#: counter.py:381
-msgid "Add"
-msgstr ""
-
-#: counter.py:382
-msgid "Remove"
-msgstr ""
-
-#: counter.py:383
-msgid "Save"
-msgstr ""
-
-#: counter.py:422
-msgid "Success!"
-msgstr ""
-
-#: counter.py:422
-msgid "Configuration saved!"
-msgstr ""
-
-#: counter.py:425
-msgid "Error"
-msgstr ""
-
-#: counter.py:425
-msgid "Horde count must be a valid number!"
-msgstr ""
-
-#: counter.py:445
-msgid "Press a key . . ."
-msgstr ""
-
-#: counter.py:466
-msgid "Create"
-msgstr ""
-
-#: counter.py:471
-msgid "Command:"
-msgstr ""
-
-#: counter.py:479
-msgid "Assign Key"
-msgstr ""
-
-#: counter.py:489
-msgid "Attention"
-msgstr ""
-
-#: counter.py:489
-msgid "Please assign your Sweet Scent Key!"
-msgstr ""
-
-#: counter.py:504
-msgid "Close"
-msgstr ""
-
-#: counter.py:504
-msgid "Configuration has not been saved! Discard changes?"
-msgstr ""
-
-#: counter.py:530
+#: counter.py:346
 msgid "enCounter"
 msgstr ""
 
-#: counter.py:607
+#: counter.py:399
+msgid "enCounter Settings"
+msgstr ""
+
+#: counter.py:415
+msgid "Horde Count: "
+msgstr ""
+
+#: counter.py:420
+msgid "Language: "
+msgstr ""
+
+#: counter.py:436
+msgid "Add"
+msgstr ""
+
+#: counter.py:437
+msgid "Remove"
+msgstr ""
+
+#: counter.py:438
+msgid "Save"
+msgstr ""
+
+#: counter.py:439
+msgid "Appearance"
+msgstr ""
+
+#: counter.py:485
+msgid "Success!"
+msgstr ""
+
+#: counter.py:485
+msgid "Configuration saved! Some settings require the program to be restarted!"
+msgstr ""
+
+#: counter.py:489
+msgid "Configuration saved!"
+msgstr ""
+
+#: counter.py:492
+msgid "Error"
+msgstr ""
+
+#: counter.py:492
+msgid "Horde count must be a valid number!"
+msgstr ""
+
+#: counter.py:512
+msgid "Press a key . . ."
+msgstr ""
+
+#: counter.py:533
+msgid "Create"
+msgstr ""
+
+#: counter.py:538
+msgid "Command:"
+msgstr ""
+
+#: counter.py:545
+msgid "Assign Key"
+msgstr ""
+
+#: counter.py:554
+msgid "Attention"
+msgstr ""
+
+#: counter.py:554
+msgid "Please assign your Sweet Scent Key!"
+msgstr ""
+
+#: counter.py:567
+msgid "Close"
+msgstr ""
+
+#: counter.py:567
+msgid "Configuration has not been saved! Discard changes?"
+msgstr ""
+
+#: counter.py:629
 msgid "Exit"
 msgstr ""
 
-#: counter.py:609
+#: counter.py:631
 msgid "Increase count"
 msgstr ""
 
-#: counter.py:610
+#: counter.py:632
 msgid "Decrease count"
 msgstr ""
 
-#: counter.py:611
+#: counter.py:633
 msgid "Undo the last action"
 msgstr ""
 
-#: counter.py:612
+#: counter.py:634
 msgid "Configure"
 msgstr ""
 
-#: counter.py:614
+#: counter.py:636
 msgid "Reset your count to 0.\nCan be undone!"
 msgstr ""
 
-#: counter.py:692
+#: counter.py:714
 msgid "Increase count by"
 msgstr ""
 
-#: counter.py:693
+#: counter.py:715
 msgid "Decrease count by"
 msgstr ""
 
