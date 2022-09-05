@@ -52,3 +52,57 @@ Now the `encounters.py` file supports customized color options!
 ## Dependencies
 * pynput: `pip3 install pynput`
 * tkinter: `sudo apt-get install python3-tk`
+
+## Auto Launch With PokeMMO
+If you are on Linux, you can modify the launch script to automatically launch enCounter on startup!  
+If you are not on Linux, you can probably still accomplish this, but I just don't know how, sorry :(  
+
+First locate your `pokemmo-installer` file, the location may vary depending on distro or desktop environment, mine was located at `/usr/games/pokemmo-installer` (Debian XFCE).  
+
+Now open this file as root (or with `sudo`) and at the bottom you will find an `if-else` statement, right before the `if` statement paste the following code:  
+```sh
+DIRE=$PWD
+cd /home/{user}/python/pokemmo-enCounter
+./counter.py &
+counter_pid=$!
+cd $DIRE
+```
+Change the second line to the directory your `counter.py` file exists.  
+
+Now inside the `else` statement add this line at the end, before the `fi`:  
+```sh
+	kill $counter_pid
+```
+
+If you got everything right, you should end up with this at the end of your file:  
+```sh
+DIRE=$PWD
+cd /home/{user}/python/pokemmo-enCounter
+./counter.py &
+counter_pid=$!
+cd $DIRE
+
+if [[ $PKMO_CREATE_DEBUGS ]]; then
+	cd "$POKEMMO"
+    ( java ${JAVA_OPTS[*]} -cp PokeMMO.exe com.pokeemu.client.Client ) &
+
+	client_pid=$!
+	
+	echo "DEBUG: Spawned client_pid $client_pid"
+	
+    rm -f "$POKEMMO/client_jvm.log"
+
+    while :; do
+        sleep 3
+        kill -3 "$client_pid" || break
+        echo "DEBUG: Threads dumped for Client JVM. Sleeping for 3 seconds.."
+    done
+
+	wait
+else
+	cd "$POKEMMO" && java ${JAVA_OPTS[*]} -cp PokeMMO.exe com.pokeemu.client.Client > /dev/null
+	kill $counter_pid
+fi
+```
+
+Now when you launch PokeMMO from your Applications launcher, it should automatically start enCounter!
